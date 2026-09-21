@@ -125,3 +125,28 @@ export function replayReport(report) {
     warnings: report.schema_version === undefined ? ['legacy_provenance_incomplete'] : ['hashes_identify_inputs_not_independent_authenticity'],
     summary_matches_recorded: isDeepStrictEqual(summary, report.summary) };
 }
+
+export function recordedReportView(report) {
+  try {
+    const replay = replayReport(report);
+    if (report.mode !== 'live_evaluation') throw new Error();
+    const recordedAt = report.collected_at ?? null;
+    if (recordedAt !== null && (typeof recordedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(recordedAt) ||
+      !Number.isFinite(Date.parse(recordedAt)) || new Date(recordedAt).toISOString().slice(0, 19) !== recordedAt.slice(0, 19))) throw new Error();
+    const models = [...new Set(report.rows.filter(row => row.status === 'ok').map(row => validateResponse(row.result).model))];
+    const cases = report.rows.map(row => {
+      const clean = row.status === 'ok' ? validateResponse(row.result) : null;
+      return { id: row.id, expected: row.expected, baseline: row.baseline,
+        status: row.status, prediction: clean?.answers.department.choice ?? null,
+        confidence: clean?.answers.department.confidence ?? null,
+        decision: clean ? route(clean, report.threshold) : null,
+        latency_ms: clean ? row.result.latency_ms : null,
+        error: clean ? null : 'evaluation_failed' };
+    });
+    return { mode: 'recorded_replay', api_calls: 0, report_id: 'support-routing-2026-09-21',
+      metadata: { recorded_at: recordedAt, model: models.length ? models.join(', ') : null,
+        requested_model: report.requested_model, split: report.split, threshold: report.threshold },
+      summary: replay.summary, diagnostics: replay.diagnostics, warnings: replay.warnings,
+      summary_matches_recorded: replay.summary_matches_recorded, cases };
+  } catch { throw new Error('Invalid or unsupported recorded report.'); }
+}

@@ -100,3 +100,53 @@ test('replay rejects malformed observations and recomputes rather than trusting 
   assert.equal(output.summary.correct_classifications_per_attempt, 15 / 16);
   assert.ok(!JSON.stringify(output).includes('PRIVATE_MARKER'));
 });
+
+test('recorded report view projects only validated recorded evidence', async () => {
+  const report = JSON.parse(await readFile(new URL('../doc/results/jev-test-2026-09-21.json', import.meta.url)));
+  report.private = 'PRIVATE_MARKER';
+  report.rows[0].private = 'PRIVATE_MARKER';
+  report.rows[0].result.private = 'PRIVATE_MARKER';
+  assert.equal(typeof evaluation.recordedReportView, 'function');
+  const view = evaluation.recordedReportView(report);
+  assert.equal(view.mode, 'recorded_replay');
+  assert.equal(view.api_calls, 0);
+  assert.equal(view.report_id, 'support-routing-2026-09-21');
+  assert.deepEqual(view.summary, replayReport(report).summary);
+  assert.equal(view.cases.length, 16);
+  assert.equal(view.metadata.recorded_at, report.collected_at);
+  assert.equal(view.metadata.model, 'jev-1.13.0');
+  assert.equal(view.metadata.requested_model, 'jev-latest');
+  assert.deepEqual(view.warnings, ['legacy_provenance_incomplete']);
+  assert.deepEqual(Object.keys(view.cases[0]), ['id', 'expected', 'baseline', 'status', 'prediction', 'confidence', 'decision', 'latency_ms', 'error']);
+  assert.ok(!JSON.stringify(view).includes('PRIVATE_MARKER'));
+});
+
+test('recorded report view makes errors and summary mismatch explicit', async () => {
+  const saved = JSON.parse(await readFile(new URL('../doc/results/jev-test-2026-09-21.json', import.meta.url)));
+  const report = structuredClone(saved);
+  report.rows = report.rows.map(row => ({ id: row.id, expected: row.expected, baseline: row.baseline, status: 'error', error: 'PRIVATE_MARKER' }));
+  report.summary = { private: 'PRIVATE_MARKER' };
+  const view = evaluation.recordedReportView(report);
+  assert.equal(view.metadata.model, null);
+  assert.equal(view.summary_matches_recorded, false);
+  assert.equal(view.diagnostics.model.successful, 0);
+  assert.ok(view.cases.every(row => row.prediction === null && row.confidence === null && row.decision === null && row.latency_ms === null && row.error === 'evaluation_failed'));
+  assert.ok(!JSON.stringify(view).includes('PRIVATE_MARKER'));
+});
+
+test('recorded report view rejects invalid saved data with one generic error', async () => {
+  const saved = JSON.parse(await readFile(new URL('../doc/results/jev-test-2026-09-21.json', import.meta.url)));
+  for (const mutate of [
+    r => { r.collected_at = 'not a timestamp'; },
+    r => { r.collected_at = '2026-02-31T04:40:30.267Z'; },
+    r => { r.rows[0].result.decision.queue = 'other'; },
+    r => { r.rows[0].result.latency_ms = Infinity; },
+    r => { r.rows[0].result.answers.department.choice = 'PRIVATE_MARKER'; },
+  ]) {
+    const report = structuredClone(saved); mutate(report);
+    assert.throws(() => evaluation.recordedReportView(report), error => error.message === 'Invalid or unsupported recorded report.');
+  }
+  const missingTimestamp = structuredClone(saved);
+  delete missingTimestamp.collected_at;
+  assert.equal(evaluation.recordedReportView(missingTimestamp).metadata.recorded_at, null);
+});

@@ -18,9 +18,9 @@ If a credential may have been exposed, revoke/rotate it through the provider and
 
 ## Report a vulnerability
 
-A dedicated private reporting channel has not yet been configured. Do not publish credentials, private tickets, or exploit details in a public issue.
+GitHub private vulnerability reporting is enabled. Use [Report a vulnerability](https://github.com/STiFLeR7/Jev-LLM-Playground/security/advisories/new) to contact the maintainer privately. Do not publish credentials, private tickets, or exploit details in a public issue.
 
-If GitHub offers a private “Report a vulnerability” action for this repository, use it; availability has not been verified. Otherwise, open a minimal issue requesting a private contact **without sensitive details**, then wait for the maintainer's response. No response time is promised.
+If the private reporting action is unavailable to you, open a minimal issue requesting a private contact **without sensitive details**, then wait for the maintainer's response. No response time is promised.
 
 ## Before a public release
 

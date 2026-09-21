@@ -14,6 +14,8 @@ Response validation protects data shape and checks some internal consistency; it
 
 ## Verification and release
 
-Fourteen automated tests pass in the recorded local environment. Browser visual, keyboard, mobile, and assistive-technology checks remain pending. Hosted CI must be verified from actual runs. No license or production-readiness guarantee is supplied.
+Twenty automated tests pass in the recorded local environment. Headless Chrome checks covered desktop/mobile layout, keyboard navigation, disclosures, scrolling regions, loading/failure/retry states, and panel independence. They did not include a screen reader and do not establish full WCAG conformance. Synthetic interception exercised live-shaped and failure states; no new live model evaluation was run.
+
+Hosted results are commit-specific; see [GitHub Actions](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/workflows/checks.yml). The project uses the [MIT license](../../LICENSE), without a production-readiness guarantee.
 
 See [validation history](../../doc/validation.md), [security](../../SECURITY.md), and [roadmap](../../doc/roadmap.md).

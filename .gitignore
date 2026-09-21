@@ -4,3 +4,5 @@
 node_modules/
 /results/
 *.log
+.playwright-cli/
+output/playwright/

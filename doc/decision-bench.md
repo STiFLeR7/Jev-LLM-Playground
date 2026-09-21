@@ -11,6 +11,8 @@ node playground.mjs replay --report doc/results/jev-test-2026-09-21.json
 
 The first command runs the baseline. The second validates saved model observations and recomputes their metrics; it never reruns Jev. Model diagnostics are `null` in baseline-only mode, not simulated measurements.
 
+The browser's Recorded experiment section exposes this same fixed report through a validated, read-only projection. It shows recomputed metrics and case filters; it cannot select paths or upload reports, and filtering makes no requests.
+
 The [config](../data/support-routing-v1.json) specifies a schema version, task, relative dataset path, dataset version, split, model, confidence threshold, policy/baseline versions, and one attempt per case. Unsupported versions, unknown fields, invalid labels, duplicate IDs, and empty selected splits fail before evaluation. Only support-routing v1 and synthetic-tickets-v1 are currently supported. Multiple tasks and repeated trials are future work.
 
 Supplying `--config` rejects simultaneous model/threshold/split overrides. Existing ad-hoc CLI flags remain available without a config. The bundled config is pinned to `jev-1.13.0`; the ad-hoc CLI retains `jev-latest`. A pinned version is not a promise of deterministic answers or indefinite provider availability.
@@ -22,6 +24,8 @@ New reports record exact dataset-byte SHA-256, effective configuration SHA-256 (
 Hashes identify content, not authenticity. Replay checks supported schema/policy, validates successful responses and recorded routing, then recomputes totals. It does not independently retrieve the original dataset, verify source hashes against historical code, or authenticate the report. `summary_matches_recorded` compares the legacy-compatible summary; diagnostic metrics are freshly derived. Preserve dataset/config/source alongside reports for independent reproduction.
 
 The historical run is left untouched and replay labels it `legacy_provenance_incomplete`. Do not retroactively invent hashes, revisions, or repeated-run observations for it.
+
+The browser projection deliberately omits ticket text because the legacy report does not contain it. Joining today's dataset would imply an unverified historical mapping. Missing optional metadata stays unavailable, failed rows remain errors rather than guessed categories, and a recorded-summary mismatch is shown explicitly.
 
 ## Metric definitions
 

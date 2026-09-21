@@ -18,7 +18,7 @@ Only on the saved synthetic sample. See [evidence limitations](../05-limitations
 
 ## Where is the license?
 
-It has not been selected. Metadata remains `UNLICENSED`; publication alone is not an open-source release claim.
+The project's original code and documentation use the [MIT license](../../LICENSE). TypeSafe's model, API, branding, and referenced third-party materials are not licensed by this repository.
 
 ## Why does localhost return an error?
 

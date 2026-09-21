@@ -16,6 +16,7 @@ Start with [Jev 101](01-jev-101/what-is-jev.md), then run the [support-routing r
 - [Evaluation guide](03-evaluation/README.md)
 - [Limitations](05-limitations/README.md)
 - [Validation record](../doc/validation.md)
+- [Education experience verification](verification/2026-09-21-education-experience.md)
 - [Roadmap](../doc/roadmap.md)
 
 Learning docs live in `docs/`. Existing research, reports, and the strategy stay in `doc/` to preserve links. Descriptions of future work are not claims of implemented behavior.

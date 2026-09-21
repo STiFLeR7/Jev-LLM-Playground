@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Small, reproducible experiments with TypeSafe AI's Jev decision model",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": { "node": ">=22.9.0" },
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",

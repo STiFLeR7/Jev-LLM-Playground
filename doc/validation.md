@@ -4,12 +4,12 @@ Date: 2026-09-21. Environment: Windows, Node.js 24.11.0.
 
 ## Offline checks
 
-- `npm test`: fourteen passing tests covering response normalization, score consistency, routing, malformed responses, HTTP/body failures, abort behavior without retries, missing credentials, evaluation denominators, synthetic splits, CLI replay, stable provenance hashes, config/dataset rejection, and HTTP concurrency/lock release.
-- `npm run eval -- --config data/support-routing-v1.json`: keyless baseline with pinned experiment settings; per-class metrics are now included.
-- Offline replay recomputes the historical summary without changing the artifact. Diagnostic metrics are derived from the existing observations, not a new live run.
+- `npm test`: 20 passing tests covering response normalization, decision traces, recorded-report projection, routing, malformed responses, HTTP/body failures, abort behavior without retries, missing credentials, evaluation denominators, synthetic splits, CLI replay, stable provenance hashes, config/dataset rejection, and HTTP concurrency/lock release.
 - `npm run demo`: request preview with zero API calls.
-- `npm run eval`: keyword baseline classified 12 of 16 test tickets correctly (75%). This is baseline performance, not Jev performance.
-- GitHub Actions is configured to run offline checks on Node 22 and 24. It has not run on GitHub yet.
+- `npm run eval -- --config data/support-routing-v1.json`: 16-case keyless keyword baseline, 12/16 correct (75%), with zero API calls. This is baseline performance, not Jev performance.
+- `node playground.mjs replay --report doc/results/jev-test-2026-09-21.json`: recomputed the historical summary with `summary_matches_recorded: true`; diagnostic metrics come from existing observations, not a new live run.
+- The historical report SHA-256 remained `2c58e7b234b6a97544f69ec001ea7d6817041e3cc028ce52f04e926b5d876a05`.
+- Hosted CI passed for published commit `80e99b7` on [GitHub Actions](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35565321063). That historical run predates milestone 2. See [current runs](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/workflows/checks.yml) for commit-specific release verification.
 
 ## Live verification
 
@@ -51,8 +51,8 @@ Cost uses the research price snapshot, excludes the first pass and previous smok
 
 The local server reuses the CLI request and response validation. Offline integration tests cover static assets, preview without API calls, live dispatch with a mock, missing credentials, oversized/invalid input, Host/Origin rejection, and sanitized provider failures. No real provider calls are made by tests.
 
-Browser rendering and interactive visual checks have not been performed. The browser UI's live path is tested at the HTTP boundary with a mock; real provider verification used the shared CLI evaluator.
+Local Headless Chrome 153.0.8010.48 browser checks covered desktop and 390px layouts, form and disclosure keyboard operation, loading/failure/retry, stale-state clearing, independent preview/recorded panels, local filtering, contained table scrolling, and zero external requests. Live-shaped responses and edge cases were intercepted synthetic fixtures; no new provider evaluation was performed. See the [detailed verification record](../docs/verification/2026-09-21-education-experience.md).
 
 ## Limits
 
-The synthetic set is tiny and labels only department ownership. Confidence threshold 0.8 is illustrative. The CLI validates response shapes and uses explicit review/error outcomes, but does not establish model calibration, prompt-injection resistance, or production reliability. License selection and GitHub publication remain pending.
+The synthetic set is tiny and labels only department ownership. Confidence threshold 0.8 is illustrative. The CLI validates response shapes and uses explicit review/error outcomes, but does not establish model calibration, prompt-injection resistance, or production reliability. The initial commit is already published on GitHub. MIT licensing and v0.1.0 publication were subsequently authorized; [release notes](../docs/releases/v0.1.0.md) describe scope and limitations.

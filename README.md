@@ -47,9 +47,9 @@ The browser shows department probabilities, urgency, frustration, suggested rout
 | --- | --- |
 | Request preview | Shows the request and a labeled keyword baseline; no Jev answer is invented |
 | Live | Sends your ticket to TypeSafe after explicit submission; consumes API credits |
-| Recorded replay | CLI-only today; validates and analyzes a saved run without querying Jev |
+| Recorded experiment | Loads the fixed saved 16-case run, recomputes metrics, and filters cases without querying Jev |
 
-The application decision trace and browser evidence explorer are **planned**, not implemented. Screenshots, a demo recording, and browser visual/accessibility verification are still pending.
+Preview and live results include a five-stage **application decision trace**: submitted input, questions, response validation, application policy, and suggested route. It explains application behavior, not hidden model reasoning. The independent recorded experiment explorer shows provenance warnings, aggregate metrics, confusion matrices, and filterable case outcomes. See the [verification record](docs/verification/2026-09-21-education-experience.md) and inspected [desktop](docs/images/recorded-explorer-desktop.png) / [mobile](docs/images/recorded-explorer-mobile.png) captures.
 
 ### Enable live requests
 
@@ -129,7 +129,7 @@ The larger package layout in the strategy is a possible future direction, not th
 
 ## Limitations and roadmap
 
-This is a local learning tool with one decision task and one baseline. There is no hosted authentication, production queue, general LLM comparison, or validated security classifier. Fourteen automated tests currently cover key behavior; browser checks and hosted CI results must be verified separately.
+This is a local learning tool with one decision task and one baseline. There is no hosted authentication, production queue, general LLM comparison, or validated security classifier. Twenty automated tests and local browser checks cover key behavior. See the [verification record](docs/verification/2026-09-21-education-experience.md) for local checks and [GitHub Actions](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/workflows/checks.yml) for commit-specific hosted results.
 
 See [limitations](docs/05-limitations/README.md), [roadmap status](doc/roadmap.md), and the [strategic plan](doc/plans/Jev-LLM-Playground-Strategic-Plan.md). Research notes are a [dated source archive](doc/research/README.md), not proof of model performance.
 
@@ -137,4 +137,4 @@ See [limitations](docs/05-limitations/README.md), [roadmap status](doc/roadmap.m
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible failures, clearer documentation, and carefully labeled synthetic cases are useful contributions. Do not post real keys or private tickets in issues. See [SECURITY.md](SECURITY.md) for reporting boundaries.
 
-**License is undecided.** Package metadata remains `UNLICENSED`; no open-source license grant or tagged release is claimed. The owner must choose a license before promoting this as an open-source release.
+Licensed under [MIT](LICENSE). The license covers this project's original code and documentation, not TypeSafe's model, hosted API, branding, or third-party materials. Referenced materials retain their respective terms. See [v0.1.0 release notes](docs/releases/v0.1.0.md).

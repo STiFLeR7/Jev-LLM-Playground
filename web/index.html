@@ -16,8 +16,52 @@
         <button class="primary" id="submit" type="submit">Preview request</button>
       </form>
     </section>
-    <section class="panel result" aria-labelledby="result-title"><h2 id="result-title">02 <span>Inspect the decision</span></h2><p id="status" role="status" aria-live="polite">Ready for your first experiment. Preview makes no API calls.</p><div id="decision" hidden><h3 id="queue"></h3><p id="meta" class="hint"></p><div id="probabilities"></div><p id="signals"></p></div><details id="raw-details" hidden><summary>Inspect JSON</summary><pre id="raw"></pre></details></section>
+    <section class="panel result" aria-labelledby="result-title"><h2 id="result-title">02 <span>Inspect the decision</span></h2><p id="status" role="status" aria-live="polite">Ready for your first experiment. Preview makes no API calls.</p><div id="decision" hidden><h3 id="queue"></h3><p id="meta" class="hint"></p><div id="probabilities"></div><p id="signals"></p></div><section id="trace" aria-labelledby="trace-title" hidden><p id="trace-mode" class="trace-mode"></p><h3 id="trace-title">Application decision trace</h3><ol id="trace-list"></ol></section><details id="raw-details" hidden><summary>Inspect JSON</summary><pre id="raw"></pre></details></section>
   </div>
+  <section class="panel recorded" aria-labelledby="recorded-title">
+    <p class="eyebrow">RECORDED EVIDENCE / NO NEW MODEL CALLS</p>
+    <h2 id="recorded-title">03 <span>Explore a saved experiment</span></h2>
+    <p>Inspect the fixed support-routing run locally. Loading this report makes no provider calls and does not change the ticket form above.</p>
+    <button class="primary recorded-load" id="load-recorded" type="button">Load recorded experiment</button>
+    <p id="recorded-status" role="status" aria-live="polite">Not loaded. The report is requested only when you use the button.</p>
+    <div id="recorded-results" hidden>
+      <section class="recorded-block" aria-labelledby="recorded-context-title">
+        <h3 id="recorded-context-title">Evidence context</h3>
+        <dl id="recorded-metadata" class="metadata-grid"></dl>
+        <p class="limitation"><strong>Synthetic sample.</strong> These public, English-language support tickets do not establish general accuracy, calibration, or production reliability.</p>
+        <div><strong>Provenance and replay notices</strong><ul id="recorded-warnings"></ul></div>
+      </section>
+      <section class="recorded-block" aria-labelledby="recorded-metrics-title">
+        <h3 id="recorded-metrics-title">Recomputed metrics</h3>
+        <dl id="recorded-metrics" class="metric-grid"></dl>
+      </section>
+      <section class="recorded-block" aria-labelledby="recorded-cases-title">
+        <h3 id="recorded-cases-title">Case outcomes</h3>
+        <label for="recorded-filter">Show cases</label>
+        <select id="recorded-filter">
+          <option value="all">All cases</option>
+          <option value="misclassified">Model misclassifications</option>
+          <option value="review">Human review</option>
+          <option value="errors">Failed requests</option>
+        </select>
+        <p id="recorded-filter-summary" class="hint"></p>
+        <div class="table-scroll" role="region" aria-label="Recorded case outcomes" tabindex="0">
+          <table>
+            <caption>Recorded case outcomes; errors have no model prediction.</caption>
+            <thead><tr><th scope="col">Case</th><th scope="col">Expected</th><th scope="col">Model prediction</th><th scope="col">Baseline</th><th scope="col">Status</th><th scope="col">Decision</th><th scope="col">Confidence</th><th scope="col">Latency</th></tr></thead>
+            <tbody id="recorded-cases"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="recorded-block" aria-labelledby="recorded-confusion-title">
+        <h3 id="recorded-confusion-title">Confusion matrices</h3>
+        <div class="matrix-grid">
+          <div class="table-scroll" role="region" aria-label="Model confusion matrix" tabindex="0"><table><caption>Model: expected rows, predicted columns. Failed requests are excluded.</caption><tbody id="recorded-model-matrix"></tbody></table></div>
+          <div class="table-scroll" role="region" aria-label="Baseline confusion matrix" tabindex="0"><table><caption>Keyword baseline: expected rows, predicted columns.</caption><tbody id="recorded-baseline-matrix"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+  </section>
   <footer>Independent community experiment · Local-only server · No ticket storage<br>Jev returns decisions, not chat. This demo never moves tickets or issues refunds.</footer>
 </main>
 </body></html>

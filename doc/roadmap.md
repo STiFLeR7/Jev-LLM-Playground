@@ -3,7 +3,7 @@
 Strategy: [user's long-term plan](plans/Jev-LLM-Playground-Strategic-Plan.md).
 Implementation detail: [reference-release plan](../docs/superpowers/plans/2026-09-21-reference-release.md).
 
-Updated 2026-09-21. This status distinguishes implemented local work from future release goals. No GitHub release or production readiness is claimed.
+Updated 2026-09-21. This status distinguishes implemented local work from future release goals. Release publication is tracked separately from feature verification; no production readiness is claimed.
 
 ## 1. Decision Bench foundation — implemented locally
 
@@ -17,19 +17,24 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [ ] Broader labeled datasets, repeat trials, and additional baselines/tasks.
 - [ ] Authorized live evaluation of a newly frozen configuration.
 
-## 2. Education and evidence experience — next
+## 2. Education and evidence experience — verified locally
 
 - [x] Beginner Jev guide and reorganized README entry point.
-- [ ] Application decision trace: input → questions → validation → policy → suggested route.
-- [ ] Read-only recorded-result explorer with provenance labels.
-- [ ] Browser/keyboard/mobile verification and synthetic screenshots.
+- [x] Application decision trace: input → questions → validation → policy → suggested route.
+- [x] Read-only recorded-result explorer with provenance labels.
+- [x] Browser/keyboard/mobile verification and labeled screenshots.
 
 ## 3. Public contribution and release — approval-dependent
 
-- [ ] Owner-selected license and private security-report channel.
+- [x] MIT license selected under owner authorization and GitHub private vulnerability reporting enabled.
 - [x] Contribution guidelines and experiment/dataset templates.
-- [ ] Pre-publication secret review and hosted CI verification.
-- [ ] Authorized commit/push, tagged release, and technical write-up.
+- [x] Hosted CI verification for published commit `80e99b7` ([run](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35565321063)).
+- [x] Pre-publication configured-key scan of all staged files and existing history; .env is not tracked. This is not an exhaustive security audit.
+- [x] Previous authorized commit and push of `80e99b7`.
+- [ ] Publish v0.1.0 after its pushed commit passes hosted CI (see [release notes](../docs/releases/v0.1.0.md)).
+- [ ] Technical write-up.
+
+Milestone 2 is locally verified and approved for publication. The hosted run above predates these changes; release publication requires green CI for the actual release commit.
 
 ## 4. Expand only after the first release
 

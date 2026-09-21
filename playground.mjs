@@ -87,6 +87,18 @@ export function route(data, threshold = 0.8) {
   };
 }
 
+export function decisionTrace(data, threshold = 0.8) {
+  const clean = validateResponse(data);
+  const decision = route(clean, threshold);
+  const { choice: category, confidence } = clean.answers.department;
+  return {
+    schema_version: 1, policy_version: 'support-routing-v1', validation: 'passed',
+    category, confidence, threshold,
+    reason: decision.action === 'route' ? 'threshold_met' : category === 'other' ? 'other_category' : 'below_threshold',
+    decision,
+  };
+}
+
 export async function evaluateTicket(text, { apiKey, model = 'jev-latest', threshold = 0.8, fetchImpl = fetch, timeoutMs = 30000 } = {}) {
   const body = requestBody(text, model);
   requireValue(probability(threshold), 'Threshold must be between 0 and 1.');

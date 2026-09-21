@@ -1,9 +1,12 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { evaluateTicket, requestBody, baseline } from './playground.mjs';
+import { evaluateTicket, requestBody, baseline, decisionTrace, validateResponse, questions } from './playground.mjs';
+import { recordedReportView } from './evaluation.mjs';
 
-export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY || process.env.JEV_LLM_API, evaluate = evaluateTicket } = {}) {
+const loadRecordedReport = async () => JSON.parse(await readFile(new URL('./doc/results/jev-test-2026-09-21.json', import.meta.url), 'utf8'));
+
+export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY || process.env.JEV_LLM_API, evaluate = evaluateTicket, readReport = loadRecordedReport } = {}) {
   let busy = false;
   const assets = { '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css'] };
   return createServer(async (req, res) => {
@@ -20,6 +23,10 @@ export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY |
         res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8` }); return res.end(body);
       }
       if (req.method === 'GET' && req.url === '/api/status') return send(200, { configured: Boolean(apiKey && apiKey !== 'replace_with_your_typesafe_key') });
+      if (req.method === 'GET' && req.url === '/api/reports/support-routing-2026-09-21') {
+        try { return send(200, recordedReportView(await readReport())); }
+        catch { return send(503, { error: 'Recorded report unavailable.' }); }
+      }
       if (req.method !== 'POST' || req.url !== '/api/triage') return send(404, { error: 'Not found.' });
       if (req.headers['content-type']?.split(';')[0] !== 'application/json') return send(415, { error: 'JSON required.' });
       const chunks = []; let size = 0;
@@ -38,7 +45,16 @@ export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY |
       if (busy) return send(429, { error: 'A live request is already running. Please wait.' });
       // ponytail: one live request at a time; add per-user limits only if this becomes a hosted service.
       busy = true;
-      try { send(200, { mode: 'live', ...await evaluate(input.text, { apiKey, threshold: input.threshold }) }); }
+      try {
+        const result = await evaluate(input.text, { apiKey, threshold: input.threshold });
+        const clean = validateResponse(result);
+        if (typeof result.latency_ms !== 'number' || !Number.isFinite(result.latency_ms) || result.latency_ms < 0) throw new Error('Invalid latency.');
+        const trace = decisionTrace(clean, input.threshold);
+        send(200, {
+          mode: 'live', model: clean.model, answers: clean.answers, usage: clean.usage,
+          latency_ms: result.latency_ms, decision: trace.decision, trace, questions,
+        });
+      }
       catch { send(502, { error: 'Provider request failed or returned an invalid response. No decision was made.' }); }
       finally { busy = false; }
     } catch { if (!res.headersSent) send(500, { error: 'Local server error.' }); else res.end(); }

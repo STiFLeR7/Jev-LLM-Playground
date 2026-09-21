@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import * as policy from '../playground.mjs';
 import { questions, requestBody, route, evaluateTicket, summarize, validateResponse } from '../playground.mjs';
 
 function reply() {
@@ -54,6 +55,22 @@ test('routes only valid, sufficiently confident, in-scope decisions', () => {
   ]) { const data = reply(); mutate(data); assert.throws(() => route(data), /Invalid API response/); }
   assert.throws(() => requestBody(' '), /Ticket/);
   assert.throws(() => route(reply(), 2), /Threshold/);
+});
+
+test('decision trace explains routing without changing the decision contract', () => {
+  assert.equal(typeof policy.decisionTrace, 'function');
+  const trace = policy.decisionTrace(reply(), 0.9);
+  assert.deepEqual(Object.keys(trace), ['schema_version', 'policy_version', 'validation', 'category', 'confidence', 'threshold', 'reason', 'decision']);
+  assert.equal(trace.reason, 'threshold_met');
+  assert.deepEqual(trace.decision, route(reply(), 0.9));
+  assert.deepEqual(Object.keys(trace.decision), ['action', 'queue', 'urgency_probability', 'frustration_score']);
+  assert.equal(policy.decisionTrace(reply(), 0.9001).reason, 'below_threshold');
+  assert.throws(() => policy.decisionTrace({}), /Invalid API response/);
+  const other = reply();
+  other.answers.department.choice = 'other';
+  other.answers.department.probabilities = { billing: 0.02, technical: 0.05, sales: 0.03, other: 0.9 };
+  assert.equal(policy.decisionTrace(other, 0).reason, 'other_category');
+  assert.equal(policy.decisionTrace(other, 1).reason, 'other_category');
 });
 
 test('HTTP request contract and error handling never substitute a decision or expose response bodies', async () => {

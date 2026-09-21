@@ -22,6 +22,6 @@ npm run triage -- --text "I need help with a refund." --threshold 0.95
 
 Without `--live`, this only previews the request. Use unit tests or saved observations to inspect deterministic policy behavior without spending API credits.
 
-An application trace should explain these rules and their inputs. It must not invent internal model reasoning or claim an action was executed. The browser trace is planned; current live output includes a suggested route and normalized JSON.
+The browser application trace explains these rules and their inputs in five stages. Preview labels model-dependent stages as pending; a successful live response shows validated observations and the policy reason. The trace is application logic, not internal model reasoning, and its route remains a suggestion rather than an executed action.
 
 [Current architecture](../02-how-it-works/architecture.md)

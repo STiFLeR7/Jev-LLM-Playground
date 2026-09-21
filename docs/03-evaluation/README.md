@@ -11,6 +11,8 @@ node playground.mjs replay --report doc/results/jev-test-2026-09-21.json
 
 The first command evaluates keywords, not Jev. The second recomputes the saved Jev report. Neither validates current provider availability.
 
+The browser's Recorded experiment section presents the same fixed replay with provenance warnings, denominators, confusion matrices, and case filters. It is read-only and makes no model calls. Its 16 rows are historical synthetic observations with incomplete legacy provenance, not a fresh evaluation.
+
 ## Design a new experiment
 
 1. Specify the task, allowed labels, review policy, and failure costs.
