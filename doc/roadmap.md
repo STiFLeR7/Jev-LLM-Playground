@@ -14,8 +14,9 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [x] Confusion matrices, per-class precision/recall/F1, and failure denominators.
 - [x] Timeout/no-retry and concurrency/lock-release checks.
 - [x] Keyless CI commands for baseline, configured benchmark, and replay.
-- [ ] Broader labeled datasets, repeat trials, and additional baselines/tasks.
-- [ ] Authorized live evaluation of a newly frozen configuration.
+- [x] Broader synthetic dataset and three-pass evaluation: 48 test cases, 144 live observations, with explicit routing/repeat metrics. See [results](../docs/03-evaluation/benchmark-v2-results.md).
+- [x] Authorized live evaluation of the frozen v2 configuration: USD 0.003198132 estimated usage against a USD 0.05 cap; journal reconciled and offline replay matches.
+- [ ] Independently adjudicated/harder datasets and additional baselines/tasks.
 
 ## 2. Education and evidence experience — verified locally
 
@@ -32,9 +33,11 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [x] Pre-publication configured-key scan of all staged files and existing history; .env is not tracked. This is not an exhaustive security audit.
 - [x] Previous authorized commit and push of `80e99b7`.
 - [x] Published [v0.1.0](https://github.com/STiFLeR7/Jev-LLM-Playground/releases/tag/v0.1.0) from commit e9420d2 after [hosted CI passed](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35570872353). See [release notes](../docs/releases/v0.1.0.md).
-- [ ] Technical write-up.
+- [x] Local [engineering write-up](../docs/03-evaluation/engineering-writeup.md); not posted to external communities.
 
 Milestone 2 is published in v0.1.0. Its exact release commit passed hosted CI on Node.js 22 and 24; subsequent roadmap-only updates do not move the release tag.
+
+The v0.2.0 benchmark work is implemented, evaluated, and authorized for publication. Publication is gated on hosted CI for the pushed release commit; see [release notes](../docs/releases/v0.2.0.md) and [GitHub releases](https://github.com/STiFLeR7/Jev-LLM-Playground/releases) for publication status. The UI intentionally continues to show the historical 16-ticket report; new evidence is available through the benchmark CLI and documentation.
 
 ## 4. Expand only after the first release
 

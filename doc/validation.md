@@ -2,6 +2,8 @@
 
 Date: 2026-09-21. Environment: Windows, Node.js 24.11.0.
 
+This record preserves the v0.1.0 checks below. Subsequent v0.2.0 benchmark work is documented in the [48-case, three-pass results](../docs/03-evaluation/benchmark-v2-results.md), including all 144 requests, spending reconciliation, and repeatability limitations. It does not replace the historical observations.
+
 ## Offline checks
 
 - `npm test`: 20 passing tests covering response normalization, decision traces, recorded-report projection, routing, malformed responses, HTTP/body failures, abort behavior without retries, missing credentials, evaluation denominators, synthetic splits, CLI replay, stable provenance hashes, config/dataset rejection, and HTTP concurrency/lock release.

@@ -85,7 +85,21 @@ Read [typed decisions](docs/01-jev-101/typed-decisions.md), [confidence](docs/01
 
 ## Experiments and results
 
-The dataset contains **32 original synthetic tickets**: 16 development and 16 test cases, four per department in each split. Only department ownership is labeled.
+### Broader benchmark (v0.2.0)
+
+The [broader benchmark](docs/03-evaluation/benchmark-v2.md) adds 48 frozen test cases across clear requests, negation, mixed intent, and embedded routing instructions, plus 8 development examples. It records three passes, routing errors, review coverage, repeat agreement, and a durable spending ledger. Original prompts and keyword rules remain unchanged.
+
+```sh
+# Zero provider calls
+node benchmark.mjs --config data/support-routing-v2.json
+node benchmark.mjs --replay doc/results/benchmark-v2-live-2026-09-21.json
+```
+
+See [results and limitations](docs/03-evaluation/benchmark-v2-results.md). Paid runs require explicit authorization and budget arguments; the benchmark ledger does not cap unrelated browser or legacy CLI calls.
+
+### Historical v0.1.0 experiment
+
+The original dataset contains **32 original synthetic tickets**: 16 development and 16 test cases, four per department in each split. Only department ownership is labeled.
 
 The saved September 21, 2026 run used `jev-latest`, resolved to `jev-1.13.0`, with threshold 0.8:
 
@@ -122,6 +136,7 @@ The [support-routing recipe](docs/04-recipes/support-routing.md) is runnable tod
 
 - `playground.mjs`: request, validation, routing, baseline, CLI.
 - `evaluation.mjs`: config loading, provenance, diagnostics, replay.
+- `benchmark.mjs` and `budget.mjs`: repeated benchmark, evidence replay, durable spending reservations.
 - `server.mjs` and `web/`: local browser interface.
 - `data/`, `test/`, `doc/results/`: synthetic fixtures, offline tests, curated evidence.
 
@@ -129,7 +144,7 @@ The larger package layout in the strategy is a possible future direction, not th
 
 ## Limitations and roadmap
 
-This is a local learning tool with one decision task and one baseline. There is no hosted authentication, production queue, general LLM comparison, or validated security classifier. Twenty automated tests and local browser checks cover key behavior. See the [verification record](docs/verification/2026-09-21-education-experience.md) for local checks and [GitHub Actions](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/workflows/checks.yml) for commit-specific hosted results.
+This is a local learning tool with one decision task and one baseline. There is no hosted authentication, production queue, general LLM comparison, or validated security classifier. Automated tests cover application boundaries, benchmark evidence, and the spending guard; local browser checks cover the released UI. See the [verification record](docs/verification/2026-09-21-education-experience.md) for UI checks and [GitHub Actions](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/workflows/checks.yml) for commit-specific hosted results.
 
 See [limitations](docs/05-limitations/README.md), [roadmap status](doc/roadmap.md), and the [strategic plan](doc/plans/Jev-LLM-Playground-Strategic-Plan.md). Research notes are a [dated source archive](doc/research/README.md), not proof of model performance.
 
@@ -137,4 +152,4 @@ See [limitations](docs/05-limitations/README.md), [roadmap status](doc/roadmap.m
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Reproducible failures, clearer documentation, and carefully labeled synthetic cases are useful contributions. Do not post real keys or private tickets in issues. See [SECURITY.md](SECURITY.md) for reporting boundaries.
 
-Licensed under [MIT](LICENSE). The license covers this project's original code and documentation, not TypeSafe's model, hosted API, branding, or third-party materials. Referenced materials retain their respective terms. See [v0.1.0 release notes](docs/releases/v0.1.0.md).
+Licensed under [MIT](LICENSE). The license covers this project's original code and documentation, not TypeSafe's model, hosted API, branding, or third-party materials. Referenced materials retain their respective terms. See [v0.2.0 release notes](docs/releases/v0.2.0.md) and the [v0.1.0 history](docs/releases/v0.1.0.md).

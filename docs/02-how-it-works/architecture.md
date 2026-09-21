@@ -11,6 +11,8 @@ Browser → server.mjs ├→ playground.mjs → TypeSafe HTTP API
 
 `playground.mjs` defines questions, builds requests, validates and normalizes responses, applies routing, and dispatches commands. `evaluation.mjs` loads experiment configurations, records provenance, and computes metrics. It reuses the current policy for replay; it is not yet independent across task versions.
 
+The separate `benchmark.mjs` CLI reuses those request/validation/routing functions and classification metrics for the frozen v2 dataset, repeated passes, checkpointed observations, and offline evidence replay. `budget.mjs` reserves the maximum request cost in a synchronized local journal before dispatch and settles reported usage afterward. One shared ledger/lock covers benchmark CLI runs only, not browser or legacy CLI spending. See the [benchmark protocol](../03-evaluation/benchmark-v2.md).
+
 `server.mjs` binds to loopback, serves an explicit asset allowlist, validates JSON input, and limits live requests to one at a time. The key is loaded in the Node process, never embedded in the browser scripts. The browser renders external values using text content.
 
 Successful live responses include shared question definitions and a versioned application trace derived from the same validated response and routing function as the decision. Preview renders pending model/policy stages and makes no provider call. This trace explains observable application processing; it does not expose or infer model reasoning.

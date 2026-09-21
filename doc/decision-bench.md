@@ -13,7 +13,7 @@ The first command runs the baseline. The second validates saved model observatio
 
 The browser's Recorded experiment section exposes this same fixed report through a validated, read-only projection. It shows recomputed metrics and case filters; it cannot select paths or upload reports, and filtering makes no requests.
 
-The [config](../data/support-routing-v1.json) specifies a schema version, task, relative dataset path, dataset version, split, model, confidence threshold, policy/baseline versions, and one attempt per case. Unsupported versions, unknown fields, invalid labels, duplicate IDs, and empty selected splits fail before evaluation. Only support-routing v1 and synthetic-tickets-v1 are currently supported. Multiple tasks and repeated trials are future work.
+The [config](../data/support-routing-v1.json) specifies a schema version, task, relative dataset path, dataset version, split, model, confidence threshold, policy/baseline versions, and one attempt per case. Unsupported versions, unknown fields, invalid labels, duplicate IDs, and empty selected splits fail before evaluation. This legacy CLI supports only support-routing v1 and synthetic-tickets-v1. The separate [v2 benchmark CLI](../docs/03-evaluation/benchmark-v2.md) adds a broader frozen dataset, repeated trials, and a spending guard; multiple decision tasks remain future work.
 
 Supplying `--config` rejects simultaneous model/threshold/split overrides. Existing ad-hoc CLI flags remain available without a config. The bundled config is pinned to `jev-1.13.0`; the ad-hoc CLI retains `jev-latest`. A pinned version is not a promise of deterministic answers or indefinite provider availability.
 

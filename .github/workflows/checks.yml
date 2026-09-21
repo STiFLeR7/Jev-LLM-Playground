@@ -18,3 +18,5 @@ jobs:
       - run: npm run eval
       - run: npm run eval -- --config data/support-routing-v1.json
       - run: node playground.mjs replay --report doc/results/jev-test-2026-09-21.json
+      - run: node benchmark.mjs --config data/support-routing-v2.json
+      - run: node benchmark.mjs --replay doc/results/benchmark-v2-live-2026-09-21.json
