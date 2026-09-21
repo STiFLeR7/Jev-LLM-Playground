@@ -17,6 +17,7 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [x] Broader synthetic dataset and three-pass evaluation: 48 test cases, 144 live observations, with explicit routing/repeat metrics. See [results](../docs/03-evaluation/benchmark-v2-results.md).
 - [x] Authorized live evaluation of the frozen v2 configuration: USD 0.003198132 estimated usage against a USD 0.05 cap; journal reconciled and offline replay matches.
 - [ ] Independently adjudicated/harder datasets and additional baselines/tasks.
+- [x] v0.3.0 challenge: 48 harder cases with blind AI review, 144 live observations, and separate agreed/disputed metrics. [Results](../docs/03-evaluation/benchmark-v3-results.md): five agreed-reference mismatches, all reviewed; cumulative v2/v3 estimated spend USD 0.0064197 under USD 0.05. Human adjudication and additional baselines/tasks remain open.
 
 ## 2. Education and evidence experience — verified locally
 
@@ -37,7 +38,7 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 
 Milestone 2 is published in v0.1.0. Its exact release commit passed hosted CI on Node.js 22 and 24; subsequent roadmap-only updates do not move the release tag.
 
-The v0.2.0 benchmark work is implemented, evaluated, and authorized for publication. Publication is gated on hosted CI for the pushed release commit; see [release notes](../docs/releases/v0.2.0.md) and [GitHub releases](https://github.com/STiFLeR7/Jev-LLM-Playground/releases) for publication status. The UI intentionally continues to show the historical 16-ticket report; new evidence is available through the benchmark CLI and documentation.
+The v0.2.0 benchmark is published. The v0.3.0 challenge benchmark is authorized for publication, gated on hosted CI for its exact release commit; see [release notes](../docs/releases/v0.2.0.md) and [GitHub releases](https://github.com/STiFLeR7/Jev-LLM-Playground/releases) for publication status. The UI intentionally continues to show the historical 16-ticket report; new evidence is available through the benchmark CLI and documentation.
 
 ## 4. Expand only after the first release
 

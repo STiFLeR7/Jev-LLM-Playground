@@ -85,6 +85,12 @@ Read [typed decisions](docs/01-jev-101/typed-decisions.md), [confidence](docs/01
 
 ## Experiments and results
 
+### Challenge benchmark (v0.3.0)
+
+The [v3 challenge run](docs/03-evaluation/benchmark-v3-results.md) retains 48 harder synthetic cases and a blind AI label review. Jev matched 121/126 attempts on 42 agreed-reference cases; all five mismatches went to review at the frozen 0.8 threshold. Six disputed cases are reported separately. This is not human-adjudicated ground truth or evidence of production reliability. Cumulative v2/v3 estimated spend: USD 0.0064197 under the approved USD 0.05 cap.
+
+Replay without API calls: `node benchmark.mjs --replay doc/results/benchmark-v3-live-2026-09-21.json`.
+
 ### Broader benchmark (v0.2.0)
 
 The [broader benchmark](docs/03-evaluation/benchmark-v2.md) adds 48 frozen test cases across clear requests, negation, mixed intent, and embedded routing instructions, plus 8 development examples. It records three passes, routing errors, review coverage, repeat agreement, and a durable spending ledger. Original prompts and keyword rules remain unchanged.

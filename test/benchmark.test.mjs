@@ -182,3 +182,77 @@ test('curated live evidence replays and reconciles with its pre-run snapshot and
   assert.equal(settlements.reduce((n, e) => n + e.input_tokens * journal[0].pricing.input_nanodollars_per_token, 0), saved.budget_after.observed_nanodollars);
   assert.ok(saved.budget_after.accounted_nanodollars <= journal[0].limit_nanodollars);
 });
+
+test('v3 retained evidence matches its freeze and reconciles cumulative budget deltas', async () => {
+  const read = async name => JSON.parse(await readFile(new URL('../doc/results/' + name, import.meta.url)));
+  const saved = await read('benchmark-v3-live-2026-09-21.json');
+  const frozen = await read('benchmark-v3-baseline-2026-09-21.json');
+  assert.equal(bench.replayBenchmark(saved).metrics_match, true);
+  assert.equal(bench.replayBenchmark(frozen).metrics_match, true);
+  for (const key of ['dataset_sha256', 'cases_sha256', 'config_sha256', 'source_sha256']) assert.equal(saved.provenance[key], frozen.provenance[key]);
+  const journal = (await readFile(new URL('../doc/results/benchmark-v3-budget-2026-09-21.jsonl', import.meta.url), 'utf8')).trim().split('\n').map(JSON.parse);
+  const before = saved.budget_before;
+  const settlements = journal.filter(e => e.type === 'settle');
+  const current = settlements.filter(e => e.id > before.requests_reserved);
+  assert.equal(current.length, saved.api_calls);
+  for (const row of saved.rows) {
+    assert.equal(journal.filter(e => e.type === 'reserve' && e.id === row.reservation_id).length, 1);
+    const matches = current.filter(e => e.id === row.reservation_id);
+    assert.equal(matches.length, 1);
+    assert.equal(matches[0].input_tokens, row.result.usage.input_tokens);
+  }
+  const cost = entries => entries.reduce((n, e) => n + e.input_tokens * journal[0].pricing.input_nanodollars_per_token, 0);
+  assert.equal(cost(current), saved.budget_after.observed_nanodollars - before.observed_nanodollars);
+  assert.equal(cost(settlements), saved.budget_after.observed_nanodollars);
+  assert.equal(saved.budget_after.held_nanodollars, 0);
+  assert.ok(saved.budget_after.accounted_nanodollars <= journal[0].limit_nanodollars);
+});
+
+test('v3 dataset contract carries reference-review status without weakening v2 or accepting mixed versions', async t => {
+  const { dir, experiment } = await setup(t);
+  const mapping = { clear: 'implicit_intent', negation: 'context_dependency', mixed_intent: 'competing_ownership', instruction_noise: 'underspecified' };
+  const cases = JSON.parse(await readFile(new URL('../data/tickets-v2.json', import.meta.url))).map(c => ({ ...c,
+    stratum: mapping[c.stratum], reference_status: c.split === 'dev' ? 'development' : 'agreed' }));
+  const config = { ...experiment.config, task: 'support-routing-v3', dataset_version: 'synthetic-tickets-v3', dataset: './tickets.json' };
+  const path = join(dir, 'config.json');
+  await writeFile(path, JSON.stringify(config));
+  await writeFile(join(dir, 'tickets.json'), JSON.stringify(cases));
+  const loaded = await bench.loadBenchmark(path);
+  assert.equal(loaded.cases.length, 48);
+  assert.equal(bench.replayBenchmark(await bench.runBenchmark(loaded)).metrics_match, true);
+  await writeFile(path, JSON.stringify({ ...config, dataset_version: 'synthetic-tickets-v2' }));
+  await assert.rejects(bench.loadBenchmark(path));
+  await writeFile(path, JSON.stringify(config));
+  cases.find(c => c.split === 'test').reference_status = 'human_verified';
+  await writeFile(join(dir, 'tickets.json'), JSON.stringify(cases));
+  await assert.rejects(bench.loadBenchmark(path));
+});
+
+test('disputed references remain visible but are excluded from agreed-label metrics', () => {
+  const cases = [{ id: 'a', expected: 'billing', expected_review: false, stratum: 'implicit_intent', text: 'refund', reference_status: 'disputed' },
+    { id: 'b', expected: 'technical', expected_review: false, stratum: 'implicit_intent', text: 'bug', reference_status: 'agreed' }];
+  const rows = [row('a', 1, 'sales'), row('b', 1, 'technical'), row('a', 2, 'sales'), row('b', 2, 'technical')];
+  const result = bench.benchmarkMetrics(cases, rows, { task: 'support-routing-v3', threshold: 0.8, attempts_per_case: 2 });
+  assert.equal(result.classification.accuracy, 0.5);
+  assert.equal(result.reference_agreement.agreed_cases, 1);
+  assert.deepEqual(result.reference_agreement.disputed_case_ids, ['a']);
+  assert.equal(result.reference_agreement.classification.accuracy, 1);
+  assert.equal(result.reference_agreement.routing.wrong_auto_routes, 0);
+});
+
+test('frozen v3 labels match the blind-review disposition and do not reuse v2 ticket text', async () => {
+  const config = fileURLToPath(new URL('../data/support-routing-v3.json', import.meta.url));
+  const experiment = await bench.loadBenchmark(config);
+  const review = JSON.parse(await readFile(new URL('../doc/research/benchmark-v3-label-review.json', import.meta.url)));
+  const blind = JSON.parse(await readFile(new URL('../doc/research/benchmark-v3-blind-cases.json', import.meta.url)));
+  const old = JSON.parse(await readFile(new URL('../data/tickets-v2.json', import.meta.url)));
+  assert.equal(experiment.cases.filter(c => c.reference_status === 'agreed').length, 42);
+  for (const c of experiment.cases) {
+    const label = review.labels.find(r => r.id === c.id);
+    assert.equal(label.author_label, c.expected);
+    assert.equal(c.reference_status, label.reviewer_uncertain || label.reviewer_label !== c.expected ? 'disputed' : 'agreed');
+    assert.equal(c.text, blind.find(b => b.id === c.id).text);
+    assert.ok(!old.some(o => o.text.trim().toLowerCase() === c.text.trim().toLowerCase()));
+  }
+  assert.equal(bench.replayBenchmark(await bench.runBenchmark(experiment)).metrics_match, true);
+});

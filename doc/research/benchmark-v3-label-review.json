@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "review_kind": "blind_separate_ai_review",
+  "human_adjudicated": false,
+  "reviewed_at": "2026-09-21",
+  "blind_input": "benchmark-v3-blind-cases.json",
+  "method": "Separate AI reviewer saw only IDs/text and unchanged routing rubric, without author labels or Jev results. Summary of returned labels/uncertainty; correlated AI bias remains possible.",
+  "initial_label_agreement": 47,
+  "total_cases": 48,
+  "agreed_reference_cases": 42,
+  "disputed_reference_cases": 6,
+  "adjudication": "Original author labels unchanged. Any uncertainty or disagreement is disputed and excluded from agreed-reference metrics. No post-Jev relabeling.",
+  "labels": [
+    {
+      "id": "v3-test-01",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-02",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-03",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-04",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-05",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-06",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-07",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-08",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-09",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-10",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-11",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-12",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-13",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-14",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-15",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-16",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-17",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-18",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-19",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-20",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-21",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-22",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-23",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-24",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-25",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-26",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-27",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-28",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-29",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-30",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-31",
+      "author_label": "other",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "Billing vs other: completed payment/order inquiry, but ownership not explicit."
+    },
+    {
+      "id": "v3-test-32",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "Expected entitlement vs technical defect."
+    },
+    {
+      "id": "v3-test-33",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "Suspension may involve billing, policy or technical causes."
+    },
+    {
+      "id": "v3-test-34",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-35",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-36",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-37",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "System rejection may indicate failure but operation unspecified."
+    },
+    {
+      "id": "v3-test-38",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-39",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "Accounts may refer to finance despite absent task."
+    },
+    {
+      "id": "v3-test-40",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-41",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": true,
+      "reference_status": "disputed",
+      "review_note": "Unavailable paid item could mean access, transaction, or fulfillment."
+    },
+    {
+      "id": "v3-test-42",
+      "author_label": "other",
+      "reviewer_label": "other",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-43",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-44",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-45",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-46",
+      "author_label": "billing",
+      "reviewer_label": "billing",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-47",
+      "author_label": "technical",
+      "reviewer_label": "technical",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    },
+    {
+      "id": "v3-test-48",
+      "author_label": "sales",
+      "reviewer_label": "sales",
+      "reviewer_uncertain": false,
+      "reference_status": "agreed"
+    }
+  ]
+}

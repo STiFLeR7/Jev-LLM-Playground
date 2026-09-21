@@ -1,5 +1,7 @@
 # Evaluation
 
+The v0.3.0 [v3 challenge protocol](benchmark-v3.md) and [results](benchmark-v3-results.md) add harder cases, blind AI reference review, and observed low-confidence routing trade-offs. Disputed references remain separate; human adjudication is still needed.
+
 The legacy implementation guide is [Decision Bench](../../doc/decision-bench.md). The [broader repeated benchmark](benchmark-v2.md) defines the new frozen dataset, denominators, spending guard, and separate replay command. See its [results](benchmark-v2-results.md).
 
 ## Repeat the offline analysis

@@ -12,12 +12,14 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const ratio = (a, b) => b ? a / b : null;
 const check = (value, message = 'Invalid benchmark configuration, dataset, or report.') => { if (!value) throw new Error(message); };
 const strata = ['clear', 'negation', 'mixed_intent', 'instruction_noise'];
+const challengeStrata = ['implicit_intent', 'context_dependency', 'competing_ownership', 'underspecified'];
 const labels = Object.keys(questions.department.criteria);
 const fields = (object, keys) => object && isDeepStrictEqual(Object.keys(object).sort(), [...keys].sort());
 
 function validateConfig(config) {
   check(fields(config, ['schema_version', 'task', 'dataset', 'dataset_version', 'split', 'model', 'threshold', 'policy_version', 'baseline_version', 'attempts_per_case', 'questions_sha256']));
-  check(config.schema_version === 1 && config.task === 'support-routing-v2' && config.dataset_version === 'synthetic-tickets-v2');
+  check(config.schema_version === 1 && ['support-routing-v2', 'support-routing-v3'].includes(config.task));
+  check(config.dataset_version === config.task.replace('support-routing', 'synthetic-tickets'));
   check(config.split === 'test' && config.model === pricing.model && config.policy_version === 'support-routing-v1' && config.baseline_version === 'keyword-v1');
   check(typeof config.dataset === 'string' && config.dataset.trim());
   check(typeof config.threshold === 'number' && Number.isFinite(config.threshold) && config.threshold >= 0 && config.threshold <= 1);
@@ -25,14 +27,17 @@ function validateConfig(config) {
   check(config.questions_sha256 === hash(JSON.stringify(questions)));
 }
 
-function validateCases(cases, onlyTest = false) {
+function validateCases(cases, onlyTest = false, task = 'support-routing-v2') {
   check(Array.isArray(cases) && cases.length === (onlyTest ? 48 : 56));
+  const challenge = task === 'support-routing-v3';
+  const allowedStrata = challenge ? challengeStrata : strata;
   const ids = new Set(), texts = new Set();
   for (const item of cases) {
-    check(fields(item, ['id', 'split', 'stratum', 'text', 'expected', 'expected_review', 'rationale']));
+    check(fields(item, ['id', 'split', 'stratum', 'text', 'expected', 'expected_review', 'rationale', ...(challenge ? ['reference_status'] : [])]));
     check(typeof item.id === 'string' && item.id.trim() && !ids.has(item.id)); ids.add(item.id);
     check((onlyTest ? ['test'] : ['dev', 'test']).includes(item.split));
-    check(strata.includes(item.stratum) && labels.includes(item.expected));
+    check(allowedStrata.includes(item.stratum) && labels.includes(item.expected));
+    if (challenge) check((item.split === 'dev' ? ['development'] : ['agreed', 'disputed']).includes(item.reference_status));
     check(item.expected_review === (item.expected === 'other'));
     check(typeof item.rationale === 'string' && item.rationale.trim());
     requestBody(item.text, pricing.model);
@@ -40,7 +45,10 @@ function validateCases(cases, onlyTest = false) {
   }
   const tests = cases.filter(c => c.split === 'test');
   check(tests.length === 48);
-  for (const stratum of strata) for (const label of labels) check(tests.filter(c => c.stratum === stratum && c.expected === label).length === 3);
+  for (const stratum of allowedStrata) {
+    check(tests.filter(c => c.stratum === stratum).length === 12);
+    if (!challenge) for (const label of labels) check(tests.filter(c => c.stratum === stratum && c.expected === label).length === 3);
+  }
 }
 
 export async function loadBenchmark(path) {
@@ -48,7 +56,7 @@ export async function loadBenchmark(path) {
   validateConfig(config);
   const bytes = await readFile(resolve(dirname(resolve(path)), config.dataset));
   const all = JSON.parse(bytes.toString('utf8'));
-  validateCases(all);
+  validateCases(all, false, config.task);
   return { config, cases: all.filter(c => c.split === 'test'), dataset_sha256: hash(bytes) };
 }
 
@@ -95,7 +103,15 @@ export function benchmarkMetrics(cases, rows, config, live = true) {
   const latencies = rows.map(r => r.attempt_latency_ms).sort((a, b) => a - b);
   const tokens = ok.reduce((sum, r) => sum + r.result.usage.input_tokens, 0);
   const planned = cases.length * config.attempts_per_case;
+  const agreed = cases.filter(c => c.reference_status === 'agreed');
+  const agreedIds = new Set(agreed.map(c => c.id));
+  const agreedRows = rows.filter(r => agreedIds.has(r.id));
   return { unique_cases: cases.length, planned_attempts: planned, attempted: rows.length, unattempted: planned - rows.length,
+    ...(config.task === 'support-routing-v3' ? { reference_agreement: {
+      agreed_cases: agreed.length, disputed_case_ids: cases.filter(c => c.reference_status === 'disputed').map(c => c.id),
+      classification: classification(agreedRows),
+      baseline: classificationMetrics(agreed.map(c => ({ expected: c.expected, prediction: baseline(c.text) }))),
+      routing: routingMetrics(agreed, agreedRows, config.threshold, config.attempts_per_case) } } : {}),
     successful: ok.length, errors: rows.length - ok.length, baseline: baselineMetrics, classification: classification(rows),
     correct_per_planned_attempt: ratio(ok.filter(r => r.result.answers.department.choice === expected.get(r.id).expected).length, planned),
     per_stratum: Object.fromEntries([...new Set(cases.map(c => c.stratum))].map(s => [s, classification(rows.filter(r => expected.get(r.id).stratum === s))])),
@@ -118,7 +134,7 @@ export function benchmarkMetrics(cases, rows, config, live = true) {
 export function replayBenchmark(report) {
   check(report?.schema_version === 'benchmark-v1');
   check(['baseline_only', 'live_benchmark'].includes(report.mode));
-  validateConfig(report.config); validateCases(report.cases, true);
+  validateConfig(report.config); validateCases(report.cases, true, report.config.task);
   check(isDeepStrictEqual(report.questions, questions));
   check(report.provenance?.cases_sha256 === hash(JSON.stringify(report.cases)));
   check(report.provenance.config_sha256 === hash(JSON.stringify(report.config)));
@@ -181,7 +197,7 @@ async function provenance(experiment) {
 }
 
 export async function runBenchmark(experiment, { live = false, apiKey, budget, outputPath, fetchImpl = fetch } = {}) {
-  validateConfig(experiment.config); validateCases(experiment.cases, true);
+  validateConfig(experiment.config); validateCases(experiment.cases, true, experiment.config.task);
   check(/^[a-f0-9]{64}$/.test(experiment.dataset_sha256));
   if (live) check(typeof apiKey === 'string' && apiKey.trim() && apiKey !== 'replace_with_your_typesafe_key' && budget && outputPath,
     'Live benchmark requires an API key, durable budget and exclusive output path.');

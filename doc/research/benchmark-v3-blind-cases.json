@@ -1,0 +1,194 @@
+[
+  {
+    "id": "v3-test-01",
+    "text": "There are two identical entries on my card statement for one month of service. One of those amounts needs to come back."
+  },
+  {
+    "id": "v3-test-02",
+    "text": "Every time I press the floppy-disk icon the window disappears, and my changes are gone when I return."
+  },
+  {
+    "id": "v3-test-03",
+    "text": "We have thirty people and are choosing a vendor this quarter. What would getting everyone on board set us back?"
+  },
+  {
+    "id": "v3-test-04",
+    "text": "Please put it back the way it was yesterday."
+  },
+  {
+    "id": "v3-test-05",
+    "text": "I paid for a year in advance but we are closing the company. What happens to the unused eleven months?"
+  },
+  {
+    "id": "v3-test-06",
+    "text": "The spinner beside the upload has been going around since breakfast. The file is only a page long."
+  },
+  {
+    "id": "v3-test-07",
+    "text": "We are still using a competitor. Could someone walk our committee through what moving over would involve commercially?"
+  },
+  {
+    "id": "v3-test-08",
+    "text": "I need a copy of everything you hold about me and then I want it erased."
+  },
+  {
+    "id": "v3-test-09",
+    "text": "Our bookkeeper cannot close the month because your latest document names our old legal entity. The payment already cleared."
+  },
+  {
+    "id": "v3-test-10",
+    "text": "The totals on the screen change when I reload even though nobody has edited any records."
+  },
+  {
+    "id": "v3-test-11",
+    "text": "We have never had an account. Is there an option that lets a small team try this for a year without paying monthly?"
+  },
+  {
+    "id": "v3-test-12",
+    "text": "A colleague told me to contact you about account 417. They did not say why."
+  },
+  {
+    "id": "v3-test-13",
+    "text": "Subject: overdue payment. The balance is settled. When I download the receipt, the page goes white and the browser stops responding."
+  },
+  {
+    "id": "v3-test-14",
+    "text": "Subject: cannot sign in. Access is restored. The pending issue is the renewal collected after our cancellation date."
+  },
+  {
+    "id": "v3-test-15",
+    "text": "We trialled the service last year and left. Our procurement team now wants terms for a fresh deployment in another company."
+  },
+  {
+    "id": "v3-test-16",
+    "text": "Forwarded message: 'Please refund my payment.' My message: that was sent to you by mistake; the money issue concerns a different supplier. I have no request for you."
+  },
+  {
+    "id": "v3-test-17",
+    "text": "The button works exactly as designed. I chose the annual option by mistake and would like the transaction undone."
+  },
+  {
+    "id": "v3-test-18",
+    "text": "The amount on the invoice is right. Clicking Pay changes the displayed amount to NaN and does not submit anything."
+  },
+  {
+    "id": "v3-test-19",
+    "text": "Your site says to contact support for a price above fifty seats. We are not customers and want to buy sixty."
+  },
+  {
+    "id": "v3-test-20",
+    "text": "Our auditor wants a copy of your SOC 2 report. We are already customers; there is no purchase, charge dispute, or product failure."
+  },
+  {
+    "id": "v3-test-21",
+    "text": "The card charge succeeded and my account shows paid. The application still treats every feature as locked, and refreshing does not help."
+  },
+  {
+    "id": "v3-test-22",
+    "text": "I can get into the app and all features work. The account ledger lists an extra seat nobody ordered, and that seat was charged."
+  },
+  {
+    "id": "v3-test-23",
+    "text": "I wrote 'refund' in the subject by mistake. Nothing has been purchased. Could we see your enterprise offering before deciding?"
+  },
+  {
+    "id": "v3-test-24",
+    "text": "Here is yesterday's chat: customer requested a demo, agent sent a booking link. Today I am only confirming I received the link; no further action needed."
+  },
+  {
+    "id": "v3-test-25",
+    "text": "The renewal amount looks wrong and the application has stopped loading. Can someone sort this out?"
+  },
+  {
+    "id": "v3-test-26",
+    "text": "I want a quote for a new division and a correction to last month's invoice for the existing division."
+  },
+  {
+    "id": "v3-test-27",
+    "text": "Please restore the connector and arrange a demonstration for the team evaluating whether to buy."
+  },
+  {
+    "id": "v3-test-28",
+    "text": "The app was unusable all weekend. I am not asking you to repair it for me; I have switched vendors and want the unused subscription money returned."
+  },
+  {
+    "id": "v3-test-29",
+    "text": "I know we were charged during the outage. Credit can wait; first get our workspace loading again."
+  },
+  {
+    "id": "v3-test-30",
+    "text": "My personal account has a disputed charge with another team. For this conversation, I represent a new company looking to purchase ten seats."
+  },
+  {
+    "id": "v3-test-31",
+    "text": "It took my payment, but I have no idea whether my order exists. I need someone to tell me what happened."
+  },
+  {
+    "id": "v3-test-32",
+    "text": "The new plan costs more and now the export option is gone. Is that supposed to happen?"
+  },
+  {
+    "id": "v3-test-33",
+    "text": "My account says suspended. No explanation. I need this dealt with."
+  },
+  {
+    "id": "v3-test-34",
+    "text": "The integration failed during our trial but we nevertheless purchased. The agreed introductory discount is absent from the issued invoice."
+  },
+  {
+    "id": "v3-test-35",
+    "text": "I do want to stop paying eventually, but don't cancel anything yet. The cancellation form crashes; please make the form work."
+  },
+  {
+    "id": "v3-test-36",
+    "text": "We are comparing vendors because the old supplier's login keeps failing. Could you price a first purchase of your product?"
+  },
+  {
+    "id": "v3-test-37",
+    "text": "Your system rejected it again. Same thing as before."
+  },
+  {
+    "id": "v3-test-38",
+    "text": "There is a problem with my plan."
+  },
+  {
+    "id": "v3-test-39",
+    "text": "I need somebody from accounts."
+  },
+  {
+    "id": "v3-test-40",
+    "text": "Why is it different from what we agreed?"
+  },
+  {
+    "id": "v3-test-41",
+    "text": "I cannot get the thing I paid for."
+  },
+  {
+    "id": "v3-test-42",
+    "text": "Please escalate this to the right person."
+  },
+  {
+    "id": "v3-test-43",
+    "text": "I don't know which account was charged, but I can see a completed payment to your company and want it reversed."
+  },
+  {
+    "id": "v3-test-44",
+    "text": "No screenshot, sorry. Pressing Export throws an exception every time."
+  },
+  {
+    "id": "v3-test-45",
+    "text": "I have not worked out our seat count yet. Do you offer discounts for a first purchase by a charity?"
+  },
+  {
+    "id": "v3-test-46",
+    "text": "The exact date escapes me, but you collected money after I ended my paid membership. Please return it."
+  },
+  {
+    "id": "v3-test-47",
+    "text": "I can't identify the version, but the mobile app freezes as soon as it opens."
+  },
+  {
+    "id": "v3-test-48",
+    "text": "I don't yet have a company name or start date. Can I see a demonstration before deciding to buy?"
+  }
+]
