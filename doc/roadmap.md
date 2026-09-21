@@ -24,17 +24,17 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [x] Read-only recorded-result explorer with provenance labels.
 - [x] Browser/keyboard/mobile verification and labeled screenshots.
 
-## 3. Public contribution and release — approval-dependent
+## 3. Public contribution and release — v0.1.0 published
 
 - [x] MIT license selected under owner authorization and GitHub private vulnerability reporting enabled.
 - [x] Contribution guidelines and experiment/dataset templates.
 - [x] Hosted CI verification for published commit `80e99b7` ([run](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35565321063)).
 - [x] Pre-publication configured-key scan of all staged files and existing history; .env is not tracked. This is not an exhaustive security audit.
 - [x] Previous authorized commit and push of `80e99b7`.
-- [ ] Publish v0.1.0 after its pushed commit passes hosted CI (see [release notes](../docs/releases/v0.1.0.md)).
+- [x] Published [v0.1.0](https://github.com/STiFLeR7/Jev-LLM-Playground/releases/tag/v0.1.0) from commit e9420d2 after [hosted CI passed](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35570872353). See [release notes](../docs/releases/v0.1.0.md).
 - [ ] Technical write-up.
 
-Milestone 2 is locally verified and approved for publication. The hosted run above predates these changes; release publication requires green CI for the actual release commit.
+Milestone 2 is published in v0.1.0. Its exact release commit passed hosted CI on Node.js 22 and 24; subsequent roadmap-only updates do not move the release tag.
 
 ## 4. Expand only after the first release
 
