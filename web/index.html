@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jev / Decision playground</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<header><a href="/" class="brand">jev <span>/ playground</span></a><span id="connection">Checking local server…</span></header>
+<main>
+  <section class="intro"><p class="eyebrow">EXPERIMENT 01 / SUPPORT TRIAGE</p><h1>One ticket.<br>Three typed decisions.</h1><p>Explore ownership, urgency, and frustration. Inspect the evidence before you automate.</p></section>
+  <div class="workspace">
+    <section class="panel"><h2>01 <span>Compose a ticket</span></h2>
+      <form id="form">
+        <label for="ticket">Ticket text</label><textarea id="ticket" maxlength="20000" required rows="7">I was charged twice. Please refund the duplicate today.</textarea>
+        <div class="samples" aria-label="Example tickets"><button type="button" data-sample="Our integration is broken and the entire team cannot work.">Outage</button><button type="button" data-sample="Can we get a demo and pricing for a new team of 30?">Sales</button><button type="button" data-sample="What is the weather tomorrow?">Out of scope</button></div>
+        <div class="threshold"><label for="threshold">Routing confidence threshold</label><output id="threshold-value" for="threshold">0.80</output></div><input id="threshold" type="range" min="0" max="1" step="0.01" value="0.8">
+        <p class="hint">Below this threshold, or classified as “other”: human review. Confidence is not a correctness guarantee.</p>
+        <label class="check"><input id="live" type="checkbox"> Live request to TypeSafe</label><p class="hint">Off by default. Live mode sends this text to TypeSafe and uses your API credits. Use synthetic inputs.</p>
+        <button class="primary" id="submit" type="submit">Preview request</button>
+      </form>
+    </section>
+    <section class="panel result" aria-labelledby="result-title"><h2 id="result-title">02 <span>Inspect the decision</span></h2><p id="status" role="status" aria-live="polite">Ready for your first experiment. Preview makes no API calls.</p><div id="decision" hidden><h3 id="queue"></h3><p id="meta" class="hint"></p><div id="probabilities"></div><p id="signals"></p></div><details id="raw-details" hidden><summary>Inspect JSON</summary><pre id="raw"></pre></details></section>
+  </div>
+  <footer>Independent community experiment · Local-only server · No ticket storage<br>Jev returns decisions, not chat. This demo never moves tickets or issues refunds.</footer>
+</main>
+</body></html>

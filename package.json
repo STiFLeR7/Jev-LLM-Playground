@@ -1,0 +1,16 @@
+{
+  "name": "jev-llm-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Small, reproducible experiments with TypeSafe AI's Jev decision model",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=22.9.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "demo": "node playground.mjs triage --text \"I was charged twice. Please refund the duplicate today.\"",
+    "triage": "node --env-file-if-exists=.env playground.mjs triage",
+    "eval": "node --env-file-if-exists=.env playground.mjs eval",
+    "test": "node --test"
+  }
+}

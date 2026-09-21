@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "task": "support-routing",
+  "dataset": "./tickets.json",
+  "dataset_version": "synthetic-tickets-v1",
+  "split": "test",
+  "model": "jev-1.13.0",
+  "threshold": 0.8,
+  "policy_version": "support-routing-v1",
+  "baseline_version": "keyword-v1",
+  "attempts_per_case": 1
+}
