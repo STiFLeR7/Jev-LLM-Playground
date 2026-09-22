@@ -3,7 +3,7 @@
 Strategy: [user's long-term plan](plans/Jev-LLM-Playground-Strategic-Plan.md).
 Implementation detail: [reference-release plan](../docs/superpowers/plans/2026-09-21-reference-release.md).
 
-Updated 2026-09-21. This status distinguishes implemented local work from future release goals. Release publication is tracked separately from feature verification; no production readiness is claimed.
+Updated 2026-09-22. This status distinguishes implemented local work from future release goals. Release publication is tracked separately from feature verification; no production readiness is claimed.
 
 ## 1. Decision Bench foundation — implemented locally
 
@@ -26,7 +26,7 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 - [x] Read-only recorded-result explorer with provenance labels.
 - [x] Browser/keyboard/mobile verification and labeled screenshots.
 
-## 3. Public contribution and release — v0.1.0 published
+## 3. Public contribution and release — v0.3.0 published
 
 - [x] MIT license selected under owner authorization and GitHub private vulnerability reporting enabled.
 - [x] Contribution guidelines and experiment/dataset templates.
@@ -38,8 +38,30 @@ Updated 2026-09-21. This status distinguishes implemented local work from future
 
 Milestone 2 is published in v0.1.0. Its exact release commit passed hosted CI on Node.js 22 and 24; subsequent roadmap-only updates do not move the release tag.
 
-The v0.2.0 benchmark is published. The v0.3.0 challenge benchmark is authorized for publication, gated on hosted CI for its exact release commit; see [release notes](../docs/releases/v0.2.0.md) and [GitHub releases](https://github.com/STiFLeR7/Jev-LLM-Playground/releases) for publication status. The UI intentionally continues to show the historical 16-ticket report; new evidence is available through the benchmark CLI and documentation.
+The v0.2.0 benchmark and [v0.3.0 challenge benchmark](https://github.com/STiFLeR7/Jev-LLM-Playground/releases/tag/v0.3.0) are published. v0.3.0 points to `da25781d16a388780e4b7385d0978b877c9c22bb`, which passed [hosted CI](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35587069614). Earlier tags remain unchanged. See [v0.3.0 release notes](../docs/releases/v0.3.0.md).
 
-## 4. Expand only after the first release
+## 4. v0.4.0 offline evidence explorer — implemented locally, unreleased
 
-Agent gating and document operations each need a task definition, labeled evaluation, and explicit execution boundaries. General-purpose LLM comparisons, provider adapters, and package workspaces should follow concrete requirements, not precede them.
+- [x] Select historical, v2, and v3 recorded reports through an explicit allowlist.
+- [x] Keep unique tickets, repeated attempts, and agreed/disputed references distinct.
+- [x] Filter label mismatches, human review, wrong automatic routes, disputed references, and failures.
+- [x] Explore thresholds using shared policy and saved answers; no provider calls or artifact writes.
+- [x] Verify browser switching, errors/retry, mobile layout, keyboard focus, and old endpoint compatibility.
+- [x] Update walkthrough and status; see [verification](../docs/verification/2026-09-22-evidence-explorer.md).
+- [x] Decision Studio: reference-inspired three-panel UI, Playground/Evidence/Learn navigation, responsive layout, and offline browser checks. [UI verification](../docs/verification/2026-09-22-decision-studio.md).
+- [ ] Separate authorization to commit, push, tag, and publish v0.4.0.
+- [x] Session-only API-key entry and clearing; no disk/browser storage or automatic provider calls.
+
+## 5. Agent harness — implemented locally, unreleased
+
+- [x] Detailed [specification](../docs/superpowers/specs/2026-09-22-agent-harness-design.md) and [execution plan](../docs/superpowers/plans/2026-09-22-agent-harness.md) written before code.
+- [x] Route/approval/complexity questions, normalized answers and deterministic execution policy.
+- [x] One consented pure local utility/workflow operation; explicit unconnected LLM handoff and human-review stop.
+- [x] Offline Agent Lab and CLI; live CLI uses the existing cumulative budget and exclusive reports.
+- [x] Versioned 20-case synthetic baseline conformance evaluation, not semantic model validation.
+- [x] Final [verification record](../docs/verification/2026-09-22-agent-harness.md): 49 tests, browser checks, source/visual reviews and unchanged cumulative spend.
+- [ ] Separate authorization to commit/push/tag/publish this milestone.
+
+## 6. Next: connected reasoning and independent evidence
+
+Select a reasoning provider/model and spending/data policy before connecting an actual LLM. Human-adjudicated agent-routing labels, semantic comparisons and document operations remain future work. No latency/cost benefit or production reliability is established by this milestone.

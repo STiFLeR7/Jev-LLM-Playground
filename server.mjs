@@ -3,8 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { evaluateTicket, requestBody, baseline, decisionTrace, validateResponse, questions } from './playground.mjs';
 import { recordedReportView } from './evaluation.mjs';
+import { evidenceFiles, evidenceView } from './evidence.mjs';
+import { runAgent } from './agent.mjs';
 
-const loadRecordedReport = async () => JSON.parse(await readFile(new URL('./doc/results/jev-test-2026-09-21.json', import.meta.url), 'utf8'));
+const loadRecordedReport = async (id = 'legacy') => JSON.parse(await readFile(new URL(`./doc/results/${evidenceFiles[id]}`, import.meta.url), 'utf8'));
 
 export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY || process.env.JEV_LLM_API, evaluate = evaluateTicket, readReport = loadRecordedReport } = {}) {
   let busy = false;
@@ -23,11 +25,25 @@ export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY |
         res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8` }); return res.end(body);
       }
       if (req.method === 'GET' && req.url === '/api/status') return send(200, { configured: Boolean(apiKey && apiKey !== 'replace_with_your_typesafe_key') });
+      if (req.method === 'GET' && req.url.startsWith('/api/evidence/')) {
+        const url = new URL(req.url, 'http://localhost');
+        const id = url.pathname.slice('/api/evidence/'.length);
+        if (!Object.hasOwn(evidenceFiles, id)) return send(404, { error: 'Not found.' });
+        if ([...url.searchParams.keys()].some(k => k !== 'threshold')) return send(404, { error: 'Not found.' });
+        const values = url.searchParams.getAll('threshold');
+        const threshold = values.length ? Number(values[0]) : undefined;
+        if (values.length > 1 || (values.length && (!/^(?:0(?:\.\d+)?|1(?:\.0+)?)$/.test(values[0]) || !Number.isFinite(threshold)))) {
+          return send(400, { error: 'Provide a threshold between 0 and 1.' });
+        }
+        try { return send(200, evidenceView(await readReport(id), id, threshold)); }
+        catch { return send(503, { error: 'Recorded report unavailable.' }); }
+      }
       if (req.method === 'GET' && req.url === '/api/reports/support-routing-2026-09-21') {
         try { return send(200, recordedReportView(await readReport())); }
         catch { return send(503, { error: 'Recorded report unavailable.' }); }
       }
-      if (req.method !== 'POST' || req.url !== '/api/triage') return send(404, { error: 'Not found.' });
+      if (req.method !== 'POST' || !['/api/triage', '/api/key', '/api/agent'].includes(req.url)) return send(404, { error: 'Not found.' });
+      if (req.url === '/api/key' && req.headers.origin !== `http://${host}`) return send(403, { error: 'Local same-origin requests only.' });
       if (req.headers['content-type']?.split(';')[0] !== 'application/json') return send(415, { error: 'JSON required.' });
       const chunks = []; let size = 0;
       for await (const chunk of req) {
@@ -37,11 +53,22 @@ export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY |
       }
       let input;
       try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(400, { error: 'Invalid JSON.' }); }
+      if (req.url === '/api/agent') {
+        if (!['preview','baseline'].includes(input?.mode)) return send(400, {error:'Agent Lab supports offline preview and baseline only. Use the budgeted CLI for live Jev.'});
+        try { return send(200, await runAgent(input)); }
+        catch { return send(400, {error:'Invalid agent task or options. Use 1–4,000 characters and the documented controls.'}); }
+      }
+      if (req.url === '/api/key') {
+        if (!input || Array.isArray(input) || Object.keys(input).length !== 1 || !Object.hasOwn(input, 'apiKey') || (input.apiKey !== null && (typeof input.apiKey !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(input.apiKey) || input.apiKey === 'replace_with_your_typesafe_key'))) return send(400, { error: 'Enter a key without spaces, up to 4096 characters.' });
+        if (busy) return send(409, { error: 'Wait for the running live request before changing the key.' });
+        apiKey = input.apiKey || '';
+        return send(200, { configured: Boolean(apiKey) });
+      }
       if (!input || typeof input.live !== 'boolean' || typeof input.threshold !== 'number' || !Number.isFinite(input.threshold) || input.threshold < 0 || input.threshold > 1) return send(400, { error: 'Provide live mode and a threshold between 0 and 1.' });
       let request;
       try { request = requestBody(input.text); } catch (error) { return send(400, { error: error.message }); }
       if (!input.live) return send(200, { mode: 'request_preview', api_calls: 0, baseline: baseline(input.text), request });
-      if (!apiKey || apiKey === 'replace_with_your_typesafe_key') return send(503, { error: 'Set TYPESAFE_API_KEY or JEV_LLM_API in .env and restart.' });
+      if (!apiKey || apiKey === 'replace_with_your_typesafe_key') return send(503, { error: 'Add an API key in the Playground, or configure .env and restart.' });
       if (busy) return send(429, { error: 'A live request is already running. Please wait.' });
       // ponytail: one live request at a time; add per-user limits only if this becomes a hosted service.
       busy = true;

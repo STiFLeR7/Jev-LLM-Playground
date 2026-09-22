@@ -36,11 +36,11 @@ export function requestBody(text, model = 'jev-latest') {
   return { model, state: { ticket: text }, questions };
 }
 
-export function validateResponse(data) {
+export function validateResponse(data, schema = questions) {
   const invalid = 'Invalid API response; no routing decision was made.';
   const answers = {};
   requireValue(typeof data?.model === 'string' && data.model.length > 0, invalid);
-  for (const [id, question] of Object.entries(questions)) {
+  for (const [id, question] of Object.entries(schema)) {
     const answer = data.answers?.[id];
     requireValue(answer?.type === question.type, invalid);
     if (question.type === 'noul') {

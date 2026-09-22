@@ -13,7 +13,9 @@ node playground.mjs replay --report doc/results/jev-test-2026-09-21.json
 
 The first command evaluates keywords, not Jev. The second recomputes the saved Jev report. Neither validates current provider availability.
 
-The browser's Recorded experiment section presents the same fixed replay with provenance warnings, denominators, confusion matrices, and case filters. It is read-only and makes no model calls. Its 16 rows are historical synthetic observations with incomplete legacy provenance, not a fresh evaluation.
+The browser's saved-evidence explorer selects the historical 16-ticket report or either 48-ticket, three-pass benchmark. It shows unique-ticket and attempt denominators, provenance warnings, matrices, and filters for label mismatches, review, wrong automatic routes, disputed references, and failures. V3's agreed-reference metrics remain separate. Legacy references are not independently reviewed; missing original ticket text is not reconstructed.
+
+The threshold control recalculates routes from saved answers through the local server. It makes no model calls, changes no predictions, and writes no files. These are exploratory policy comparisons, not fresh evaluations or a justification for tuning on the test set. Different datasets are not pooled or ranked. See the [walkthrough and verification](../verification/2026-09-22-evidence-explorer.md).
 
 ## Design a new experiment
 

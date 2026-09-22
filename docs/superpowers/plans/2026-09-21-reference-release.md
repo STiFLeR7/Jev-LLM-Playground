@@ -21,7 +21,7 @@
 
 ## File responsibilities
 
-Implementation checkpoint: response normalization, score consistency, offline replay, hashed provenance, the versioned config loader, detailed class metrics, and timeout/concurrency checks are implemented. See `doc/decision-bench.md` for exact supported contracts and metric denominators. Trace UI, broader datasets, education/contribution work, and release approval remain pending. Work is on `improve/validation-bench`, uncommitted; no new paid calls were made. The detailed unchecked steps below retain the original plan; `doc/roadmap.md` is the current milestone-status record.
+Historical plan: the reference-release scope shipped in v0.1.0, followed by v0.2.0 and v0.3.0 benchmark releases. Work now uses main. The original unchecked steps below are retained as planning history, not outstanding tasks. See `doc/roadmap.md` for current completion and release status, including the locally implemented v0.4.0 explorer.
 
 | Files | Responsibility |
 | --- | --- |

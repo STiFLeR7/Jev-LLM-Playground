@@ -1,54 +1,95 @@
 <!doctype html>
+<!-- THESIS: A decision workbench, not a chat dashboard or scrolling marketing demo.
+OWN-WORLD: Warm white, pale neutral panels, near-black type, thin borders, one blue action accent.
+STORY: Compose a ticket, inspect a typed result, explore evidence, understand policy.
+FIRST VIEWPORT: Slim context bar; 208px navigation; 360px controls; spacious result canvas with an honest empty state.
+FORM: User-pinned three-panel composition from supplied reference and approved Creative Direction; no random concept seed.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jev / Decision playground</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jev / Decision Studio</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
 <body>
-<header><a href="/" class="brand">jev <span>/ playground</span></a><span id="connection">Checking local server…</span></header>
-<main>
-  <section class="intro"><p class="eyebrow">EXPERIMENT 01 / SUPPORT TRIAGE</p><h1>One ticket.<br>Three typed decisions.</h1><p>Explore ownership, urgency, and frustration. Inspect the evidence before you automate.</p></section>
-  <div class="workspace">
-    <section class="panel"><h2>01 <span>Compose a ticket</span></h2>
-      <form id="form">
-        <label for="ticket">Ticket text</label><textarea id="ticket" maxlength="20000" required rows="7">I was charged twice. Please refund the duplicate today.</textarea>
-        <div class="samples" aria-label="Example tickets"><button type="button" data-sample="Our integration is broken and the entire team cannot work.">Outage</button><button type="button" data-sample="Can we get a demo and pricing for a new team of 30?">Sales</button><button type="button" data-sample="What is the weather tomorrow?">Out of scope</button></div>
-        <div class="threshold"><label for="threshold">Routing confidence threshold</label><output id="threshold-value" for="threshold">0.80</output></div><input id="threshold" type="range" min="0" max="1" step="0.01" value="0.8">
-        <p class="hint">Below this threshold, or classified as “other”: human review. Confidence is not a correctness guarantee.</p>
-        <label class="check"><input id="live" type="checkbox"> Live request to TypeSafe</label><p class="hint">Off by default. Live mode sends this text to TypeSafe and uses your API credits. Use synthetic inputs.</p>
-        <button class="primary" id="submit" type="submit">Preview request</button>
-      </form>
+<a class="skip-link" href="#main">Skip to workspace</a>
+<header class="topbar"><a href="#playground" class="brand"><span class="brand-mark" aria-hidden="true">j.</span> Jev <span class="brand-sub">Playground</span></a><div class="breadcrumb"><span>/</span><span id="workspace-context">Support routing</span><span class="tag">Local workspace</span></div><span id="connection" class="connection">Checking local server…</span></header>
+<div class="app-shell">
+  <aside class="sidebar">
+    <nav aria-label="Workspace">
+      <a href="#playground" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7m-3.5-3.5v7"/></svg><span>Playground</span></a>
+      <a href="#evidence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16h17M9 15v-4m5 4V7m5 8v-6"/></svg><span>Evidence</span></a>
+      <a href="#learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 014 2 4 4 0 014-2h5v15h-5a4 4 0 00-4 2 4 4 0 00-4-2H3z"/></svg><span>Learn</span></a>
+      <a href="#agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M12 8v5M5 17v-4h14v4"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/></svg><span>Agent Lab</span></a>
+    </nav>
+    <div class="sidebar-note"><span class="local-dot"></span> Runs on your machine<p>Experiment locally.<br>Keep the decisions visible.</p></div>
+    <a class="repo-link" href="https://github.com/STiFLeR7/Jev-LLM-Playground" target="_blank" rel="noopener noreferrer">View repository <span aria-hidden="true">↗</span></a>
+    <p class="sidebar-footer">Independent community project.<br>Not affiliated with TypeSafe AI.</p>
+  </aside>
+  <main id="main" tabindex="-1">
+    <section id="view-playground" class="workspace-view" aria-labelledby="playground-title">
+      <div class="workspace">
+        <section class="control-panel">
+          <div class="section-heading"><h1 id="playground-title" tabindex="-1">Playground</h1><p>From a support ticket to a typed decision.</p></div>
+          <div class="model-line"><span>Decision model</span><strong>Jev <span class="tag">jev-latest</span></strong></div>
+          <details class="key-settings"><summary>Add / manage API key</summary>
+            <form id="key-form" autocomplete="off">
+              <label for="api-key">TypeSafe API key</label>
+              <input id="api-key" type="password" required maxlength="4096" autocomplete="off" spellcheck="false" aria-describedby="key-help">
+              <p id="key-help" class="hint">Kept in this local server's memory until restart. Shared by its open tabs; never saved to browser storage or .env. Saving does not verify the key or call TypeSafe.</p>
+              <div class="key-actions"><button id="save-key" type="submit">Use key for this session</button><button id="clear-key" type="button">Clear key</button></div>
+              <p id="key-status" class="hint" role="status" aria-live="polite">Live requests remain opt-in. Clearing also disables an environment key until restart.</p>
+            </form>
+          </details>
+          <form id="form">
+            <div class="field-heading"><label for="ticket">Ticket text</label><span>Synthetic input</span></div>
+            <textarea id="ticket" maxlength="20000" required rows="6" aria-describedby="input-help">I was charged twice. Please refund the duplicate today.</textarea>
+            <p id="input-help" class="hint">Use an example, or write your own. Avoid private customer data.</p>
+            <div class="samples" aria-label="Example tickets"><button type="button" data-sample="Our integration is broken and the entire team cannot work.">Outage</button><button type="button" data-sample="Can we get a demo and pricing for a new team of 30?">Sales inquiry</button><button type="button" data-sample="What is the weather tomorrow?">Out of scope</button></div>
+            <div class="form-section"><div class="threshold"><label for="threshold">Routing confidence threshold</label><output id="threshold-value" for="threshold">0.80</output></div><input id="threshold" type="range" min="0" max="1" step="0.01" value="0.8" aria-describedby="threshold-help"><p id="threshold-help" class="hint">Below this value, or classified as “other”: human review. Confidence does not guarantee correctness.</p></div>
+            <div class="form-section"><label class="check"><input id="live" type="checkbox"> Live request to TypeSafe</label><p class="hint">Off by default. Live mode sends this text to TypeSafe and uses API credits.</p></div>
+            <button class="primary" id="submit" type="submit">Preview request</button><p class="button-note">Preview builds a request. No model call.</p>
+          </form>
+        </section>
+        <section class="result-canvas" aria-labelledby="result-title">
+          <div class="canvas-heading"><h2 id="result-title">Decision output</h2><span id="output-mode" class="tag">Awaiting input</span></div>
+          <div class="result">
+            <p id="status" class="status-line" role="status" aria-live="polite">Ready. Preview a request to begin.</p>
+            <div id="result-empty" class="empty-state"><div class="empty-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7m-3.5-3.5v7"/></svg></div><h3>A decision you can inspect.</h3><p>Start with a ticket on the left. Preview the questions, then opt into a live request when you’re ready.</p><div class="typed-key"><span>Choice <small>Ownership</small></span><span>Noul <small>Urgency</small></span><span>Score <small>Frustration</small></span></div><a href="#evidence">Or explore recorded answers <span aria-hidden="true">→</span></a></div>
+            <div id="decision" hidden><div class="decision-heading"><span>Suggested outcome</span><h3 id="queue"></h3></div><p id="meta" class="hint"></p><h4>Department probabilities</h4><div id="probabilities"></div><p id="signals"></p></div>
+            <section id="trace" aria-labelledby="trace-title" hidden><p id="trace-mode" class="trace-mode"></p><h3 id="trace-title">Application decision trace</h3><ol id="trace-list"></ol></section>
+            <details id="raw-details" hidden><summary>Inspect request / response JSON</summary><pre id="raw"></pre></details>
+          </div>
+          <p class="canvas-footer">Suggested actions only. This playground never moves tickets or issues refunds.</p>
+        </section>
+      </div>
     </section>
-    <section class="panel result" aria-labelledby="result-title"><h2 id="result-title">02 <span>Inspect the decision</span></h2><p id="status" role="status" aria-live="polite">Ready for your first experiment. Preview makes no API calls.</p><div id="decision" hidden><h3 id="queue"></h3><p id="meta" class="hint"></p><div id="probabilities"></div><p id="signals"></p></div><section id="trace" aria-labelledby="trace-title" hidden><p id="trace-mode" class="trace-mode"></p><h3 id="trace-title">Application decision trace</h3><ol id="trace-list"></ol></section><details id="raw-details" hidden><summary>Inspect JSON</summary><pre id="raw"></pre></details></section>
-  </div>
-  <section class="panel recorded" aria-labelledby="recorded-title">
-    <p class="eyebrow">RECORDED EVIDENCE / NO NEW MODEL CALLS</p>
-    <h2 id="recorded-title">03 <span>Explore a saved experiment</span></h2>
-    <p>Inspect the fixed support-routing run locally. Loading this report makes no provider calls and does not change the ticket form above.</p>
-    <button class="primary recorded-load" id="load-recorded" type="button">Load recorded experiment</button>
-    <p id="recorded-status" role="status" aria-live="polite">Not loaded. The report is requested only when you use the button.</p>
+    <section id="view-evidence" class="workspace-view" aria-labelledby="recorded-title" hidden>
+      <div class="workspace evidence-workspace">
+        <section class="control-panel recorded-controls">
+          <div class="section-heading"><h1 id="recorded-title" tabindex="-1">Evidence</h1><p>Inspect the experiment, not just the score.</p></div>
+          <div class="mode-note"><span class="local-dot"></span> Recorded answers · No model calls</div>
+          <label for="recorded-experiment">Recorded experiment</label>
+          <select id="recorded-experiment"><option value="legacy">Historical · 16 tickets</option><option value="v2">Broader benchmark · 48 tickets</option><option value="v3" selected>Challenge benchmark · 48 tickets</option></select>
+          <button class="primary recorded-load" id="load-recorded" type="button">Load recorded experiment</button>
+          <p id="recorded-status" class="hint" role="status" aria-live="polite">Not loaded. Choose an experiment to inspect its saved answers.</p>
+          <div class="form-section evidence-policy"><div class="threshold"><label for="recorded-threshold">Explore routing threshold</label><output id="recorded-threshold-value" for="recorded-threshold">0.80</output></div><input id="recorded-threshold" type="range" min="0" max="1" step="0.01" value="0.8" disabled aria-describedby="recorded-policy-help"><p id="recorded-policy-help" class="hint">Recalculate routing from saved answers. Predictions and the original recorded policy stay unchanged.</p><button id="recorded-reset" type="button" disabled>Restore recorded threshold</button></div>
+          <div class="form-section"><label for="recorded-filter">Show attempts</label><select id="recorded-filter"><option value="all">All attempts</option><option value="misclassified">Label mismatches</option><option value="review">Human review</option><option value="wrong-route">Wrong automatic routes</option><option value="disputed">Disputed references</option><option value="errors">Failed requests</option></select><p class="hint">Filters affect the table, not aggregate metrics.</p></div>
+          <p class="scope-note">Different datasets are not a leaderboard. Repeated attempts are not independent tickets.</p>
+        </section>
+        <section class="recorded result-canvas" aria-label="Recorded experiment results"><div class="canvas-heading"><h2>Experiment results</h2><span class="tag">Read-only</span></div>
+          <div id="evidence-empty" class="empty-state"><div class="empty-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16h17M9 15v-4m5 4V7m5 8v-6"/></svg></div><h3>Look beyond the headline.</h3><p>Load a saved experiment to inspect the labels, review decisions, and cases behind its results.</p><p class="hint">Historical, broader, and challenge datasets.<br>No API key required.</p></div>
     <div id="recorded-results" hidden>
-      <section class="recorded-block" aria-labelledby="recorded-context-title">
-        <h3 id="recorded-context-title">Evidence context</h3>
-        <dl id="recorded-metadata" class="metadata-grid"></dl>
-        <p class="limitation"><strong>Synthetic sample.</strong> These public, English-language support tickets do not establish general accuracy, calibration, or production reliability.</p>
-        <div><strong>Provenance and replay notices</strong><ul id="recorded-warnings"></ul></div>
-      </section>
+      <p class="limitation"><strong>Recorded synthetic evidence.</strong> Not production data. Repeated attempts are correlated; AI-agreed labels are not human adjudication.</p>
       <section class="recorded-block" aria-labelledby="recorded-metrics-title">
         <h3 id="recorded-metrics-title">Recomputed metrics</h3>
+        <p id="recorded-policy-label" class="hint"></p>
         <dl id="recorded-metrics" class="metric-grid"></dl>
+        <div id="recorded-agreed" hidden><h4>Agreed references only · blind AI review</h4><p class="hint">Disputed references excluded. AI agreement is not human adjudication or objective ground truth.</p><dl id="recorded-agreed-metrics" class="metric-grid"></dl></div>
       </section>
       <section class="recorded-block" aria-labelledby="recorded-cases-title">
-        <h3 id="recorded-cases-title">Case outcomes</h3>
-        <label for="recorded-filter">Show cases</label>
-        <select id="recorded-filter">
-          <option value="all">All cases</option>
-          <option value="misclassified">Model misclassifications</option>
-          <option value="review">Human review</option>
-          <option value="errors">Failed requests</option>
-        </select>
-        <p id="recorded-filter-summary" class="hint"></p>
+        <h3 id="recorded-cases-title">Attempt outcomes</h3>
+        <p id="recorded-filter-summary" class="hint" role="status" aria-live="polite"></p>
         <div class="table-scroll" role="region" aria-label="Recorded case outcomes" tabindex="0">
           <table>
-            <caption>Recorded case outcomes; errors have no model prediction.</caption>
-            <thead><tr><th scope="col">Case</th><th scope="col">Expected</th><th scope="col">Model prediction</th><th scope="col">Baseline</th><th scope="col">Status</th><th scope="col">Decision</th><th scope="col">Confidence</th><th scope="col">Latency</th></tr></thead>
+            <caption>One row per attempted request, not per unique ticket. Mismatches use author labels, including disputed ones; errors have no prediction.</caption>
+            <thead><tr><th scope="col">Case / saved input</th><th scope="col">Pass</th><th scope="col">Reference review</th><th scope="col">Expected</th><th scope="col">Model prediction</th><th scope="col">Baseline</th><th scope="col">Status</th><th scope="col">Explored decision</th><th scope="col">Confidence</th><th scope="col">Latency</th></tr></thead>
             <tbody id="recorded-cases"></tbody>
           </table>
         </div>
@@ -60,8 +101,49 @@
           <div class="table-scroll" role="region" aria-label="Baseline confusion matrix" tabindex="0"><table><caption>Keyword baseline: expected rows, predicted columns.</caption><tbody id="recorded-baseline-matrix"></tbody></table></div>
         </div>
       </section>
+      <details class="recorded-block provenance-details">
+        <summary>Provenance and experiment context</summary>
+        <h3 id="recorded-context-title">Evidence context</h3>
+        <dl id="recorded-metadata" class="metadata-grid"></dl>
+        <p class="limitation"><strong>Synthetic sample.</strong> These public, English-language support tickets do not establish general accuracy, calibration, or production reliability.</p>
+        <div><strong>Provenance and replay notices</strong><ul id="recorded-warnings"></ul></div>
+      </details>
     </div>
-  </section>
-  <footer>Independent community experiment · Local-only server · No ticket storage<br>Jev returns decisions, not chat. This demo never moves tickets or issues refunds.</footer>
-</main>
+
+        </section>
+      </div>
+    </section>
+    <section id="view-agent" class="workspace-view" aria-labelledby="agent-title" hidden>
+      <div class="workspace">
+        <section class="control-panel">
+          <div class="section-heading"><h1 id="agent-title" tabindex="-1">Agent Lab</h1><p>A bounded harness. Every decision visible.</p></div>
+          <div class="mode-note"><span class="local-dot"></span> Offline lab · No provider calls</div>
+          <form id="agent-form">
+            <label for="agent-text">Task</label><textarea id="agent-text" rows="5" required maxlength="4000" aria-describedby="agent-help">calculate: 12 + 3</textarea>
+            <p id="agent-help" class="hint">Exact local syntax: calculate: 12 + 3 · count words: your text · checklist: first; second.</p>
+            <div class="samples"><button type="button" data-agent-sample="calculate: 12 + 3">Calculate</button><button type="button" data-agent-sample="checklist: inspect; test; document">Checklist</button><button type="button" data-agent-sample="draft: a friendly greeting">LLM handoff</button></div>
+            <div class="form-section"><label for="agent-mode">Decision source</label><select id="agent-mode"><option value="preview">Request preview</option><option value="baseline">Deterministic baseline</option></select><p class="hint">The baseline is an explicit-syntax rule, not a Jev observation.</p></div>
+            <div class="form-section"><label class="check"><input id="agent-execute" type="checkbox"> Allow one local operation</label><p class="hint">Pure calculation, word count or checklist only. No files, network calls, shell commands or external actions.</p></div>
+            <button id="agent-submit" class="primary" type="submit">Run offline harness</button>
+          </form>
+          <p class="scope-note">Live Jev is available through the budgeted CLI. The reasoning LLM is not connected. <a href="#learn">Learn the boundaries</a>.</p>
+        </section>
+        <section class="result-canvas" aria-label="Agent harness results">
+          <div class="canvas-heading"><h2>Harness trace</h2><span class="tag">Bounded execution</span></div>
+          <div class="result"><p id="agent-status" class="status-line" role="status" aria-live="polite">Ready. Preview the gate or try the offline baseline.</p>
+            <div id="agent-empty" class="empty-state"><h3>Route first. Execute deliberately.</h3><p>The gate suggests a handler. Application policy checks the operation and your consent before anything runs.</p><p class="hint">Task → decision → policy → local result<br>LLM handoff stops without a provider call.</p></div>
+            <div id="agent-result" hidden><h3 id="agent-outcome"></h3><p id="agent-reason" class="hint"></p><h4>Execution result</h4><pre id="agent-output"></pre><h4>Application trace</h4><ol id="agent-trace"></ol><details><summary>Inspect harness JSON</summary><pre id="agent-json"></pre></details></div>
+          </div><p class="canvas-footer">This harness is not a safety classifier or production agent. No hidden reasoning or simulated provider answers.</p>
+        </section>
+      </div>
+    </section>
+    <section id="view-learn" class="workspace-view learn-view" aria-labelledby="learn-title" hidden>
+      <div class="learn-heading"><h1 id="learn-title" tabindex="-1">Decisions, with context.</h1><p>Jev returns structured answers. Your application decides what happens next.</p></div>
+      <div class="learn-content"><section><h2>Three questions. One ticket.</h2><dl class="concept-list"><div><dt>Choice</dt><dd>Select a department: billing, technical, sales, or other. A constrained label is not proof of a correct answer.</dd></div><div><dt>Noul</dt><dd>A yes/no-style probabilistic answer. Here, it asks whether the ticket is urgent.</dd></div><div><dt>Score</dt><dd>Evaluate an ordered scale. Here, frustration ranges from calm to very angry.</dd></div></dl></section>
+      <section><h2>The model answers. You set the policy.</h2><p>The playground validates the response, then checks the category and confidence. “Other” and below-threshold answers go to human review. Everything else gets a suggested team.</p><p>A confidence value is not a correctness guarantee. The application trace explains these steps, not hidden model reasoning.</p><a class="text-link" href="#playground">Try a request preview →</a></section>
+      <section><h2>Read the evidence carefully.</h2><p>Our reports use small synthetic datasets. Repeated passes are correlated; blind AI agreement is not human adjudication. Zero observed routing errors does not establish production reliability.</p><a class="text-link" href="#evidence">Explore the saved experiments →</a></section>
+      <section class="learn-links"><h2>Go deeper</h2><a href="https://github.com/STiFLeR7/Jev-LLM-Playground/tree/main/docs" target="_blank" rel="noopener noreferrer">Project documentation ↗</a><a href="https://docs.typesafe.ai/introduction" target="_blank" rel="noopener noreferrer">Official TypeSafe introduction ↗</a><p class="hint">External documentation opens in a new tab.</p></section></div>
+    </section>
+  </main>
+</div>
 </body></html>

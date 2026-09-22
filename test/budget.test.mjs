@@ -14,6 +14,17 @@ async function location(t) {
   return join(dir, 'spend.jsonl');
 }
 
+test('existing-only budget never creates a missing cumulative ledger', async t => {
+  const path=await location(t);
+  await assert.rejects(budgetModule.openBudget(path,'0.05',{existingOnly:true}));
+  await assert.rejects(readFile(path),{code:'ENOENT'});
+  const created=await budgetModule.openBudget(path,'0.05');await created.close();
+  const existing=await budgetModule.openBudget(path,'0.05',{existingOnly:true});
+  await existing.reserve();await existing.close();
+  const reopened=await budgetModule.openBudget(path,'0.05',{existingOnly:true});
+  try {assert.equal(reopened.snapshot().held_nanodollars,2752512);} finally {await reopened.close();}
+});
+
 test('reserve full request cost before dispatch; exact boundary blocks the next call', async t => {
   const path = await location(t);
   const budget = await budgetModule.openBudget(path, '0.002752512');

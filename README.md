@@ -41,17 +41,21 @@ These commands respectively preview a request, run the keyword baseline, and rec
 
 ## Interactive demo
 
-The browser shows department probabilities, urgency, frustration, suggested routing, latency, token usage, and normalized JSON for live responses.
+The Decision Studio separates **Playground**, **Evidence**, **Learn**, and **Agent Lab** into focused workspaces. Configure a ticket beside its application trace, explore recorded experiments, or try the bounded offline harness. Live support responses show department probabilities, urgency, frustration, suggested routing, latency, token usage, and normalized JSON. See the [UI verification](docs/verification/2026-09-22-decision-studio.md) and [design system](DESIGN.md).
 
 | Mode | What happens |
 | --- | --- |
 | Request preview | Shows the request and a labeled keyword baseline; no Jev answer is invented |
 | Live | Sends your ticket to TypeSafe after explicit submission; consumes API credits |
-| Recorded experiment | Loads the fixed saved 16-case run, recomputes metrics, and filters cases without querying Jev |
+| Recorded experiment | Selects historical, v2, or v3 saved evidence; filters attempts and explores routing thresholds without querying Jev |
 
-Preview and live results include a five-stage **application decision trace**: submitted input, questions, response validation, application policy, and suggested route. It explains application behavior, not hidden model reasoning. The independent recorded experiment explorer shows provenance warnings, aggregate metrics, confusion matrices, and filterable case outcomes. See the [verification record](docs/verification/2026-09-21-education-experience.md) and inspected [desktop](docs/images/recorded-explorer-desktop.png) / [mobile](docs/images/recorded-explorer-mobile.png) captures.
+Preview and live results include a five-stage **application decision trace**: submitted input, questions, response validation, application policy, and suggested route. It explains application behavior, not hidden model reasoning. The recorded evidence explorer separates unique tickets from repeated attempts, shows agreed/disputed references, and recalculates routing using saved answers. Threshold exploration changes neither predictions nor stored evidence; it does not establish an optimal threshold. See the [explorer verification and walkthrough](docs/verification/2026-09-22-evidence-explorer.md). Earlier [desktop](docs/images/recorded-explorer-desktop.png) / [mobile](docs/images/recorded-explorer-mobile.png) captures document the historical v0.1.0 interface.
 
 ### Enable live requests
+
+In **Playground → Add / manage API key**, enter your TypeSafe key and choose **Use key for this session**. The masked field clears after submission. The local server keeps the key only in memory, shared across its tabs, until restart. Saving makes no provider call and does not verify the key. **Clear key** disables the active key, including an environment-loaded key, until another key is added or the server restarts. Live mode stays opt-in.
+
+For persistent local configuration instead:
 
 Create `.env` from [.env.example](.env.example), preserving any existing file. Set `TYPESAFE_API_KEY` to your key. The legacy name `JEV_LLM_API` is accepted as a fallback. Never commit either value.
 
@@ -62,6 +66,17 @@ npm run triage -- --text "I was charged twice. Please refund the duplicate today
 ```
 
 Omit `--live` for a request preview. The key stays on the server; live ticket text goes to TypeSafe. The app does not persist browser tickets. Use synthetic inputs and read [SECURITY.md](SECURITY.md) before experimenting with sensitive content.
+
+## Agent Lab — a bounded agent harness
+
+The **Agent Lab** workspace previews decision requests and runs an offline routing baseline with explicit consent for one local calculation, word count, or checklist transformation. It shows the policy and execution trace. General-purpose LLM routes stop at an explicitly unconnected handoff; no chat response is fabricated.
+
+```sh
+node agent.mjs --baseline --execute --text "calculate: 12 + 3"
+node agent-eval.mjs
+```
+
+Both are offline. The [agent-gating recipe](docs/04-recipes/agent-gating.md) documents the optional budgeted live Jev CLI, exact operation syntax, and synthetic evaluation limitations. This is implemented locally, not part of the published v0.3.0 release.
 
 ## How it works
 
@@ -143,6 +158,7 @@ The [support-routing recipe](docs/04-recipes/support-routing.md) is runnable tod
 - `playground.mjs`: request, validation, routing, baseline, CLI.
 - `evaluation.mjs`: config loading, provenance, diagnostics, replay.
 - `benchmark.mjs` and `budget.mjs`: repeated benchmark, evidence replay, durable spending reservations.
+- `evidence.mjs`: allowlisted recorded-report projection and offline policy exploration.
 - `server.mjs` and `web/`: local browser interface.
 - `data/`, `test/`, `doc/results/`: synthetic fixtures, offline tests, curated evidence.
 

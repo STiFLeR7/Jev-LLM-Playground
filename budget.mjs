@@ -1,4 +1,4 @@
-import { openSync, closeSync, readFileSync, writeFileSync, fsyncSync, unlinkSync } from 'node:fs';
+import { constants, openSync, closeSync, readFileSync, writeFileSync, fsyncSync, unlinkSync } from 'node:fs';
 import { isDeepStrictEqual } from 'node:util';
 
 // Official model limits/pricing verified 2026-09-21: https://docs.typesafe.ai/models
@@ -9,7 +9,7 @@ export const pricing = Object.freeze({ model: 'jev-1.13.0', max_input_tokens: 65
 const reservation = pricing.max_input_tokens * pricing.input_nanodollars_per_token;
 const check = (ok, message = 'Invalid budget ledger.') => { if (!ok) throw new Error(message); };
 
-export async function openBudget(path, limitUsd) {
+export async function openBudget(path, limitUsd, { existingOnly = false } = {}) {
   check(typeof limitUsd === 'string' && /^\d+(?:\.\d{1,9})?$/.test(limitUsd), 'Invalid budget limit.');
   const [whole, fraction = ''] = limitUsd.split('.');
   const limitBig = BigInt(whole) * 1000000000n + BigInt(fraction.padEnd(9, '0'));
@@ -55,8 +55,11 @@ export async function openBudget(path, limitUsd) {
   };
   try {
     let created = false;
-    try { file = openSync(path, 'wx+', 0o600); created = true; }
-    catch (error) { if (error.code !== 'EEXIST') throw error; file = openSync(path, 'a+', 0o600); }
+    if (existingOnly) file = openSync(path, constants.O_RDWR | constants.O_APPEND);
+    else {
+      try { file = openSync(path, 'wx+', 0o600); created = true; }
+      catch (error) { if (error.code !== 'EEXIST') throw error; file = openSync(path, 'a+', 0o600); }
+    }
     if (created) { writeFileSync(file, JSON.stringify(header) + '\n'); fsyncSync(file); }
     else {
       const text = readFileSync(path, 'utf8');

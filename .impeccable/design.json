@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-22T04:44:36.030Z",
+  "title": "Design System: Jev Decision Studio",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Near-black",
+        "tonalRamp": [
+          "oklch(15% 0.005 260)",
+          "oklch(26% 0.005 260)",
+          "oklch(38% 0.005 260)",
+          "oklch(49% 0.005 260)",
+          "oklch(61% 0.005 260)",
+          "oklch(72% 0.005 260)",
+          "oklch(84% 0.005 260)",
+          "oklch(95% 0.005 260)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "tonalRamp": [
+          "oklch(15% 0.014 260)",
+          "oklch(26% 0.014 260)",
+          "oklch(38% 0.014 260)",
+          "oklch(49% 0.014 260)",
+          "oklch(61% 0.014 260)",
+          "oklch(72% 0.014 260)",
+          "oklch(84% 0.014 260)",
+          "oklch(95% 0.014 260)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Divider gray",
+        "tonalRamp": [
+          "oklch(15% 0.006 260)",
+          "oklch(26% 0.006 260)",
+          "oklch(38% 0.006 260)",
+          "oklch(49% 0.006 260)",
+          "oklch(61% 0.006 260)",
+          "oklch(72% 0.006 260)",
+          "oklch(84% 0.006 260)",
+          "oklch(95% 0.006 260)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "warm-white": {
+        "role": "neutral",
+        "displayName": "Warm white",
+        "tonalRamp": [
+          "oklch(15% 0.004 90)",
+          "oklch(26% 0.004 90)",
+          "oklch(38% 0.004 90)",
+          "oklch(49% 0.004 90)",
+          "oklch(61% 0.004 90)",
+          "oklch(72% 0.004 90)",
+          "oklch(84% 0.004 90)",
+          "oklch(95% 0.004 90)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Cool mist",
+        "tonalRamp": [
+          "oklch(15% 0.004 260)",
+          "oklch(26% 0.004 260)",
+          "oklch(38% 0.004 260)",
+          "oklch(49% 0.004 260)",
+          "oklch(61% 0.004 260)",
+          "oklch(72% 0.004 260)",
+          "oklch(84% 0.004 260)",
+          "oklch(95% 0.004 260)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Action blue",
+        "tonalRamp": [
+          "oklch(15% 0.19 264)",
+          "oklch(26% 0.19 264)",
+          "oklch(38% 0.19 264)",
+          "oklch(49% 0.19 264)",
+          "oklch(61% 0.19 264)",
+          "oklch(72% 0.19 264)",
+          "oklch(84% 0.19 264)",
+          "oklch(95% 0.19 264)"
+        ]
+      },
+      "blue-soft": {
+        "role": "primary",
+        "displayName": "Pale blue",
+        "tonalRamp": [
+          "oklch(15% 0.025 264)",
+          "oklch(26% 0.025 264)",
+          "oklch(38% 0.025 264)",
+          "oklch(49% 0.025 264)",
+          "oklch(61% 0.025 264)",
+          "oklch(72% 0.025 264)",
+          "oklch(84% 0.025 264)",
+          "oklch(95% 0.025 264)"
+        ]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Success green",
+        "tonalRamp": [
+          "oklch(15% 0.1 151)",
+          "oklch(26% 0.1 151)",
+          "oklch(38% 0.1 151)",
+          "oklch(49% 0.1 151)",
+          "oklch(61% 0.1 151)",
+          "oklch(72% 0.1 151)",
+          "oklch(84% 0.1 151)",
+          "oklch(95% 0.1 151)"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning ochre",
+        "tonalRamp": [
+          "oklch(15% 0.1 75)",
+          "oklch(26% 0.1 75)",
+          "oklch(38% 0.1 75)",
+          "oklch(49% 0.1 75)",
+          "oklch(61% 0.1 75)",
+          "oklch(72% 0.1 75)",
+          "oklch(84% 0.1 75)",
+          "oklch(95% 0.1 75)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field gray",
+        "tonalRamp": [
+          "oklch(15% 0.01 260)",
+          "oklch(26% 0.01 260)",
+          "oklch(38% 0.01 260)",
+          "oklch(49% 0.01 260)",
+          "oklch(61% 0.01 260)",
+          "oklch(72% 0.01 260)",
+          "oklch(84% 0.01 260)",
+          "oklch(95% 0.01 260)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page headline",
+        "purpose": "Workspace page titles."
+      },
+      "title": {
+        "displayName": "Section title",
+        "purpose": "Compact section headings."
+      },
+      "body": {
+        "displayName": "Inherited body",
+        "purpose": "Root scale; working copy uses compact overrides."
+      },
+      "hint": {
+        "displayName": "Explanatory hint",
+        "purpose": "Recurring form and evidence explanations."
+      },
+      "label": {
+        "displayName": "Form label",
+        "purpose": "Semibold control labels."
+      },
+      "tag": {
+        "displayName": "Status tag",
+        "purpose": "Small medium-weight state labels."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "background 160ms, border-color 160ms",
+        "purpose": "Button hover state."
+      },
+      {
+        "name": "navigation-transition",
+        "value": "background 160ms, color 160ms",
+        "purpose": "Workspace navigation hover state."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition: none !important; scroll-behavior: auto !important",
+        "purpose": "Applied when prefers-reduced-motion is reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "1500px"
+      },
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "stacked",
+        "value": "900px"
+      },
+      {
+        "name": "phone",
+        "value": "480px"
+      }
+    ],
+    "focus": {
+      "value": "3px solid #7899ee",
+      "offset": "3px"
+    },
+    "tonalRampNote": "Synthesized OKLCH preview ramps only; these are not implemented palette steps."
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action within a control panel.",
+      "html": "<button class=\"ds-button ds-primary\">Preview request</button>",
+      "css": ".ds-button{font-family:Segoe UI,Arial,sans-serif;font-size:.83rem;line-height:1.5;padding:9px 12px;border:1px solid #d7d9df;border-radius:6px;background:var(--surface,#fff);color:var(--ink,#202124);cursor:pointer;transition:background 160ms,border-color 160ms}.ds-button:hover:not(:disabled){background:#f1f3f7;border-color:#b8bdc8}.ds-button:focus-visible{outline:3px solid #7899ee;outline-offset:3px}.ds-button:disabled{opacity:.5;cursor:not-allowed}.ds-primary{background:var(--accent,#2859d8);border-color:var(--accent,#2859d8);color:#fff;font-weight:600;min-height:44px;width:100%;margin-top:18px}.ds-primary:hover:not(:disabled){background:#204ab9;border-color:#204ab9}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A supporting local action.",
+      "html": "<button class=\"ds-button\">Restore recorded threshold</button>",
+      "css": ".ds-button{font-family:Segoe UI,Arial,sans-serif;font-size:.83rem;line-height:1.5;padding:9px 12px;border:1px solid #d7d9df;border-radius:6px;background:var(--surface,#fff);color:var(--ink,#202124);cursor:pointer;transition:background 160ms,border-color 160ms}.ds-button:hover:not(:disabled){background:#f1f3f7;border-color:#b8bdc8}.ds-button:focus-visible{outline:3px solid #7899ee;outline-offset:3px}.ds-button:disabled{opacity:.5;cursor:not-allowed}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Ticket field",
+      "kind": "input",
+      "refersTo": "textarea",
+      "description": "Native resizable text entry with an explicit label.",
+      "html": "<label class=\"ds-label\" for=\"ds-ticket\">Ticket text</label><textarea class=\"ds-textarea\" id=\"ds-ticket\" rows=\"6\">I was charged twice.</textarea>",
+      "css": ".ds-label{display:block;font:600 .84rem/1.5 Segoe UI,Arial,sans-serif;color:var(--ink,#202124);margin-bottom:9px}.ds-textarea{display:block;resize:vertical;width:100%;min-height:150px;padding:12px 13px;border:1px solid #ced1d8;border-radius:7px;background:var(--surface,#fff);color:var(--ink,#202124);font:.88rem/1.65 Segoe UI,Arial,sans-serif}.ds-textarea:focus-visible{outline:3px solid #7899ee;outline-offset:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Experiment selector",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Native selection for saved experiments.",
+      "html": "<label class=\"ds-label\" for=\"ds-experiment\">Recorded experiment</label><select class=\"ds-select\" id=\"ds-experiment\"><option>Challenge benchmark · 48 tickets</option><option>Historical · 16 tickets</option></select>",
+      "css": ".ds-label{display:block;font:600 .84rem/1.5 Segoe UI,Arial,sans-serif;margin-bottom:9px}.ds-select{display:block;width:100%;padding:10px 30px 10px 11px;border:1px solid #ced1d8;border-radius:6px;background:var(--surface,#fff);color:var(--ink,#202124);font:.84rem/1.5 Segoe UI,Arial,sans-serif}.ds-select:focus-visible{outline:3px solid #7899ee;outline-offset:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Workspace navigation",
+      "kind": "nav",
+      "description": "Current workspace is expressed in text, fill, and aria-current.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Workspace\"><a href=\"#playground\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><path d=\"M14 17.5h7m-3.5-3.5v7\"/></svg>Playground</a><a href=\"#evidence\">Evidence</a><a href=\"#learn\">Learn</a><a href=\"#agent\">Agent Lab</a></nav>",
+      "css": ".ds-nav{display:grid;gap:6px;font:1rem/1.5 Segoe UI,Arial,sans-serif}.ds-nav a{display:flex;align-items:center;gap:12px;color:#585b63;padding:11px 13px;border:1px solid transparent;border-radius:7px;font-weight:500;text-decoration:none;transition:background 160ms,color 160ms}.ds-nav a:hover{background:#f0f1f3}.ds-nav a[aria-current=page]{background:var(--blue-soft,#edf2ff);color:#244fc0;border-color:#dbe4fd}.ds-nav svg{width:18px;height:18px}.ds-nav a:focus-visible{outline:3px solid #7899ee;outline-offset:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Status tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "An informational label rather than an action.",
+      "html": "<span class=\"ds-tag\">Read-only</span>",
+      "css": ".ds-tag{display:inline-block;border:1px solid var(--line,#e3e4e7);border-radius:5px;padding:3px 7px;font:500 .72rem/1.5 Segoe UI,Arial,sans-serif;color:var(--muted,#62666e);background:var(--surface,#fff);white-space:nowrap}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    },
+    {
+      "name": "Suggested outcome",
+      "kind": "card",
+      "description": "Contained result; review state is warm and named explicitly.",
+      "html": "<div class=\"ds-outcome\"><span>Suggested outcome</span><h3>Send to human review</h3></div>",
+      "css": ".ds-outcome{margin:24px 0 12px;padding:20px;background:#fffaf0;border:1px solid #eadcc0;border-radius:10px;font-family:Segoe UI,Arial,sans-serif;line-height:1.5}.ds-outcome>span{font-size:.75rem;color:var(--muted,#62666e)}.ds-outcome h3{font-size:1.6rem;letter-spacing:-.02em;margin:6px 0 0;font-weight:600;color:var(--warning,#885c15)}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Decision Studio",
+    "overview": "A calm decision workbench uses warm white, pale neutral panels, near-black type, thin borders, and a blue action accent. Compact controls sit beside spacious results; structure comes from alignment and separation rather than decorative imagery.\n\nThe interface makes preview, live, and recorded states readable in text. Evidence keeps its explanatory context, and keyboard access remains part of the visual system. This records the implemented native-browser interface in `web/style.css`, `web/index.html`, and `web/app.js`.",
+    "keyCharacteristics": [
+      "Flat, lightly bordered surfaces.",
+      "Compact system typography with generous explanatory line spacing.",
+      "Blue action and selection cues; semantic status colors.",
+      "Persistent desktop navigation that becomes horizontal on smaller screens."
+    ],
+    "rules": [
+      {
+        "name": "The Explicit State Rule",
+        "body": "Pair status color with readable state text; preview, live, and recorded labels carry the meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Quiet Hierarchy Rule",
+        "body": "Use size, weight, spacing, and muted supporting copy to separate titles from explanation.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Distinguish panels through tone and thin borders rather than shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep preview, live, and recorded state labels explicit.",
+      "Do use native controls, visible keyboard focus, and reduced-motion support.",
+      "Do preserve local table scrolling and stack workspaces on narrow screens.",
+      "Do use muted explanatory text and thin rules to organize dense evidence."
+    ],
+    "donts": [
+      "Don't replace status text with color alone.",
+      "Don't add shadows to the flat panel hierarchy.",
+      "Don't turn the decision workspace into a generic chat surface."
+    ]
+  }
+}

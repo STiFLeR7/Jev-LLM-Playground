@@ -1,4 +1,19 @@
 const $ = id => document.getElementById(id);
+function showWorkspace(focus = false) {
+  const name = ['playground', 'evidence', 'learn', 'agent'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'playground';
+  $('workspace-context').textContent={playground:'Support routing',evidence:'Recorded evidence',learn:'Learning guide',agent:'Agent routing'}[name];
+  for (const view of document.querySelectorAll('.workspace-view')) view.hidden = view.id !== `view-${name}`;
+  for (const link of document.querySelectorAll('nav[aria-label="Workspace"] a')) {
+    if (link.hash === `#${name}`) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  }
+  if (focus) $({ playground: 'playground-title', evidence: 'recorded-title', learn: 'learn-title', agent: 'agent-title' }[name]).focus({ preventScroll: true });
+}
+window.addEventListener('hashchange', () => { showWorkspace(true); window.scrollTo(0, 0); });
+document.querySelector('.skip-link').addEventListener('click', event => {
+  event.preventDefault(); $('main').focus();
+});
+showWorkspace();
 let pending = false;
 function reset() {
   $('threshold-value').value = Number($('threshold').value).toFixed(2);
@@ -6,6 +21,10 @@ function reset() {
   $('decision').hidden = $('trace').hidden = $('raw-details').hidden = true;
   $('trace-list').replaceChildren();
   $('raw').textContent = '';
+  $('result-empty').hidden = false;
+  $('output-mode').textContent = 'Awaiting input';
+  $('status').dataset.state = 'ready';
+  document.querySelector('.button-note').textContent = $('live').checked ? 'Live request uses your API credits.' : 'Preview builds a request. No model call.';
   $('status').textContent = 'Ready. Run again to inspect these inputs.';
 }
 function traceItem(headingText, contentText) {
@@ -26,6 +45,7 @@ function questionSummary(questions) {
   }).join(' ');
 }
 function renderTrace(input, result) {
+  $('result-empty').hidden = true;
   const preview = result.mode === 'request_preview';
   const questions = preview ? result.request.questions : result.questions;
   const items = [
@@ -57,7 +77,35 @@ function renderTrace(input, result) {
 }
 $('form').addEventListener('input', reset);
 document.querySelectorAll('[data-sample]').forEach(button => button.addEventListener('click', () => { $('ticket').value = button.dataset.sample; reset(); }));
-fetch('/api/status').then(r => r.json()).then(s => { $('connection').textContent = s.configured ? 'Local server / key configured' : 'Local server / preview only — no key'; }).catch(() => { $('connection').textContent = 'Local server unavailable'; });
+function showConnection(configured) {
+  $('connection').textContent = configured ? 'API key configured' : 'Preview only · no key';
+  $('connection').dataset.configured = String(configured);
+}
+fetch('/api/status').then(r => r.json()).then(s => showConnection(s.configured)).catch(() => { $('connection').textContent = 'Local server unavailable'; });
+let keyPending = false;
+async function changeKey(clear = false) {
+  if (keyPending) return;
+  keyPending = true;
+  const body = JSON.stringify({ apiKey: clear ? null : $('api-key').value });
+  $('api-key').value = '';
+  const controls = [...$('key-form').querySelectorAll('input, button')];
+  controls.forEach(control => { control.disabled = true; });
+  $('key-status').textContent = clear ? 'Clearing key…' : 'Saving in server memory…';
+  try {
+    const response = await fetch('/api/key', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal: AbortSignal.timeout(10000) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Key change failed.');
+    showConnection(result.configured);
+    $('live').checked = false; reset();
+    $('key-status').textContent = clear ? 'Key cleared. Live requests are unavailable until a key is added or the server restarts with an environment key.' : 'Key stored until server restart. Not verified with TypeSafe. Enable Live only when ready.';
+  } catch {
+    $('key-status').textContent = 'Could not confirm the change. Wait for any live request to finish, then re-enter the key or clear it again.';
+  } finally {
+    keyPending = false; controls.forEach(control => { control.disabled = false; });
+  }
+}
+$('key-form').addEventListener('submit', event => { event.preventDefault(); changeKey(); });
+$('clear-key').addEventListener('click', () => changeKey(true));
 $('form').addEventListener('submit', async event => {
   event.preventDefault();
   if (pending) return;
@@ -66,17 +114,22 @@ $('form').addEventListener('submit', async event => {
   const controls = [...$('form').querySelectorAll('input, textarea, button')];
   controls.forEach(control => { control.disabled = true; });
   $('status').textContent = input.live ? 'Requesting a typed decision…' : 'Preparing request preview…';
+  $('output-mode').textContent = input.live ? 'Requesting live answer' : 'Preparing preview';
   try {
     const response = await fetch('/api/triage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input), signal: AbortSignal.timeout(35000) });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Request failed.');
     $('raw').textContent = JSON.stringify(result, null, 2); $('raw-details').hidden = false;
     if (result.mode === 'request_preview') {
+      $('output-mode').textContent = 'Preview · no model call';
       $('status').textContent = `Preview only · 0 API calls · Keyword baseline: ${result.baseline}. This is not a Jev answer.`;
       renderTrace(input, result);
-      $('raw-details').open = true; return;
+      $('raw-details').open = false; return;
     }
     $('status').textContent = 'Live response validated. Suggested action only.';
+    $('status').dataset.state = 'live';
+    $('output-mode').textContent = 'Live response';
+    $('decision').dataset.action = result.decision.action;
     $('decision').hidden = false; $('raw-details').open = false;
     $('queue').textContent = result.decision.action === 'review' ? 'Send to human review' : `Route to ${result.decision.queue}`;
     $('meta').textContent = `${result.model} · ${result.latency_ms} ms · ${result.usage.input_tokens} input / ${result.usage.output_tokens} output tokens · confidence ${result.answers.department.confidence.toFixed(2)}`;
@@ -90,7 +143,10 @@ $('form').addEventListener('submit', async event => {
     }
     $('signals').textContent = `Urgency: ${Math.round(result.decision.urgency_probability * 100)}% · Frustration: ${result.decision.frustration_score.toFixed(2)} / 2`;
     renderTrace(input, result);
-  } catch (error) { $('status').textContent = error.name === 'TimeoutError' ? 'Request timed out. No decision was made.' : error.message; }
+  } catch (error) {
+    $('status').textContent = error.name === 'TimeoutError' ? 'Request timed out. No decision was made.' : error.message;
+    $('status').dataset.state = 'error'; $('output-mode').textContent = 'No decision';
+  }
   finally { pending = false; controls.forEach(control => { control.disabled = false; }); }
 });
 
@@ -121,17 +177,30 @@ function renderMatrix(target, matrix) {
   $(target).replaceChildren(heading, ...rows);
 }
 function renderRecordedCases() {
+  if (!recordedReport) return;
   const filter = $('recorded-filter').value;
   const include = row => filter === 'all'
     || (filter === 'errors' && row.status === 'error')
     || (filter === 'review' && row.decision?.action === 'review')
+    || (filter === 'wrong-route' && row.decision?.action === 'route' && row.prediction !== row.expected)
+    || (filter === 'disputed' && row.reference_status === 'disputed')
     || (filter === 'misclassified' && row.status === 'ok' && row.prediction !== row.expected);
   const rows = recordedReport.cases.filter(include);
-  $('recorded-filter-summary').textContent = rows.length ? `${rows.length} of ${recordedReport.cases.length} cases shown. Aggregate metrics retain full-report denominators.` : `No cases match this filter. Aggregate metrics still use all ${recordedReport.cases.length} attempts.`;
+  $('recorded-filter-summary').textContent = `${rows.length ? `${rows.length} of ${recordedReport.cases.length} attempts shown (${new Set(rows.map(r => r.id)).size} unique tickets).` : 'No attempts match this filter.'} Aggregate metrics retain full-experiment denominators; agreed-reference metrics remain separate.`;
   $('recorded-cases').replaceChildren(...rows.map(item => {
     const row = document.createElement('tr');
     const decision = item.decision ? (item.decision.action === 'review' ? 'Human review' : `Route to ${item.decision.queue}`) : 'Not available';
-    const values = [item.id, item.expected, display(item.prediction), item.baseline, item.status === 'ok' ? 'Successful' : 'Error', decision, item.confidence === null ? 'Not available' : Number(item.confidence).toFixed(2), item.latency_ms === null ? 'Not available' : `${item.latency_ms} ms`];
+    const input = document.createElement('td');
+    input.textContent = item.id;
+    if (item.text) {
+      const details = document.createElement('details');
+      const summary = document.createElement('summary'); summary.textContent = 'Read saved input';
+      const text = document.createElement('p'); text.textContent = item.text;
+      details.append(summary, text); input.append(details);
+    }
+    row.append(input);
+    const review = { agreed: 'AI-agreed', disputed: 'Disputed', not_reviewed: 'Not independently reviewed' }[item.reference_status];
+    const values = [item.pass, review, item.expected, display(item.prediction), item.baseline, item.status === 'ok' ? 'Successful' : 'Error', decision, item.confidence === null ? 'Not available' : Number(item.confidence).toFixed(2), item.latency_ms === null ? 'Not available' : `${item.latency_ms} ms`];
     row.append(...values.map(value => { const cell = document.createElement('td'); cell.textContent = value; return cell; }));
     return row;
   }));
@@ -145,12 +214,23 @@ function renderRecorded(report) {
     ...definition('Resolved model', display(metadata.model)),
     ...definition('Recorded date', recordedAt),
     ...definition('Evaluation split', metadata.split),
-    ...definition('Routing threshold', display(metadata.threshold)),
-    ...definition('Sample size', `${summary.cases} synthetic cases`),
+    ...definition('Dataset', metadata.dataset),
+    ...definition('Recorded routing threshold', display(metadata.recorded_threshold)),
+    ...definition('Sample size', `${metadata.unique_cases} unique synthetic tickets · ${metadata.attempts_per_case} retained pass(es)`),
+    ...definition('Attempts', `${summary.cases} observed / ${metadata.planned_attempts} planned · ${summary.unattempted ?? 0} unattempted`),
+    ...definition('Collection status', metadata.stop_reason),
     ...definition('Report', `${report.report_id} · recorded replay · ${report.api_calls} API calls`),
   );
-  const notices = [...report.warnings];
-  notices.push(report.summary_matches_recorded ? 'Recomputed summary matches the recorded summary.' : 'Warning: recomputed summary does not match the recorded summary.');
+  const warningText = {
+    legacy_provenance_incomplete: 'Historical report: original provenance is incomplete. Only one pass is retained; original ticket text is not included in this artifact.',
+    synthetic_author_labels: 'Synthetic tickets with author-assigned labels, not real customer traffic.',
+    repeats_are_correlated: 'Repeated attempts are correlated observations, not additional independent tickets.',
+    hashes_are_not_independent_authenticity: 'Hashes identify frozen inputs; they do not establish independent authenticity.',
+    cost_is_pricing_based_not_invoice: 'Cost is a dated pricing estimate, not a provider invoice.',
+    blind_ai_review_not_human_adjudication: 'Six references were disputed before the run. Blind AI review is not independent human adjudication.',
+  };
+  const notices = report.warnings.map(w => warningText[w] || w);
+  notices.push(report.summary_matches_recorded ? 'Replay at the original recorded threshold matches the saved summary.' : 'Warning: replay at the original recorded threshold does not match the saved summary.');
   $('recorded-warnings').replaceChildren(...notices.map(value => { const item = document.createElement('li'); item.textContent = value; return item; }));
   const model = diagnostics.model;
   const correctSuccessful = model?.accuracy === null || model?.accuracy === undefined ? null : Math.round(model.accuracy * model.successful);
@@ -159,30 +239,110 @@ function renderRecorded(report) {
   $('recorded-metrics').replaceChildren(
     ...definition('Model accuracy · successful responses', correctSuccessful === null ? 'Not available' : `${correctSuccessful}/${model.successful} (${percent(model.accuracy)})`),
     ...definition('Model accuracy · all attempts', correctAttempts === null ? 'Not available' : `${correctAttempts}/${model.attempts} (${percent(model.correct_per_attempt)})`),
-    ...definition('Keyword baseline accuracy', baselineCorrect === null ? 'Not available' : `${baselineCorrect}/${diagnostics.baseline.attempts} (${percent(diagnostics.baseline.accuracy)})`),
+    ...definition('Keyword baseline · unique tickets', baselineCorrect === null ? 'Not available' : `${baselineCorrect}/${diagnostics.baseline.attempts} (${percent(diagnostics.baseline.accuracy)})`),
     ...definition('Failed requests', `${summary.errors}/${summary.cases}`),
     ...definition('Human review coverage', `${summary.review_count}/${summary.cases} (${percent(summary.cases ? summary.review_count / summary.cases : null)})`),
+    ...definition('Automatic routes · observed attempts', `${summary.automatically_routed}/${summary.cases}`),
     ...definition('Wrong automatic routes', display(diagnostics.wrong_auto_routes)),
-    ...definition('Successful-call latency', summary.latency_ms.p50 === null ? 'Not available' : `p50 ${summary.latency_ms.p50} ms · p95 ${summary.latency_ms.p95} ms`),
+    ...definition(metadata.latency_basis, summary.latency_ms.p50 === null ? 'Not available' : `p50 ${summary.latency_ms.p50} ms · p95 ${summary.latency_ms.p95} ms`),
     ...definition('Historical token estimate', summary.estimated_successful_cost_usd === null ? 'Not available' : `$${summary.estimated_successful_cost_usd.toFixed(6)} · ${summary.cost_basis}`),
   );
+  $('recorded-threshold').value = metadata.threshold;
+  $('recorded-threshold-value').value = metadata.threshold.toFixed(2);
+  $('recorded-policy-label').textContent = `All author references. Routing uses ${metadata.threshold.toFixed(2)} ${metadata.threshold === metadata.recorded_threshold ? '(recorded policy)' : `(exploratory; recorded policy was ${metadata.recorded_threshold.toFixed(2)})`}. Predictions and classification metrics are unchanged by threshold exploration.`;
+  $('recorded-agreed').hidden = !report.agreed;
+  $('recorded-agreed-metrics').replaceChildren();
+  if (report.agreed) {
+    const a = report.agreed;
+    $('recorded-agreed-metrics').append(
+      ...definition('Reference set', `${a.agreed_cases} agreed tickets · ${a.disputed_case_ids.length} disputed tickets excluded`),
+      ...definition('Matching attempts', `${Math.round(a.classification.correct_per_attempt * a.classification.attempts)}/${a.classification.attempts} (${percent(a.classification.correct_per_attempt)})`),
+      ...definition('Automatic routes / reviews', `${a.routing.automatically_routed} / ${a.routing.review_count}`),
+      ...definition('Wrong automatic routes', display(a.routing.wrong_auto_routes)),
+    );
+  }
   renderMatrix('recorded-model-matrix', model?.confusion_matrix ?? null);
   renderMatrix('recorded-baseline-matrix', diagnostics.baseline.confusion_matrix);
   renderRecordedCases();
+  $('evidence-empty').hidden = true;
   $('recorded-results').hidden = false;
 }
 $('recorded-filter').addEventListener('change', renderRecordedCases);
-$('load-recorded').addEventListener('click', async () => {
-  const button = $('load-recorded'); button.disabled = true;
+let exploredThreshold;
+async function loadRecorded() {
+  const controls = ['load-recorded', 'recorded-experiment', 'recorded-threshold', 'recorded-reset', 'recorded-filter'].map($);
+  const focusedControl = controls.includes(document.activeElement) ? document.activeElement : null;
+  controls.forEach(c => { c.disabled = true; });
+  recordedReport = null;
+  $('evidence-empty').hidden = true;
   $('recorded-results').hidden = true;
   $('recorded-status').textContent = 'Loading the saved report…';
   try {
-    const response = await fetch('/api/reports/support-routing-2026-09-21', { signal: AbortSignal.timeout(10000) });
+    const query = exploredThreshold === undefined ? '' : `?threshold=${exploredThreshold}`;
+    const response = await fetch(`/api/evidence/${$('recorded-experiment').value}${query}`, { signal: AbortSignal.timeout(10000) });
     const report = await response.json();
     if (!response.ok) throw new Error(report.error || 'Recorded experiment unavailable.');
     renderRecorded(report);
-    $('recorded-status').textContent = 'Recorded experiment loaded locally. No provider calls were made.';
+    $('recorded-status').textContent = 'Saved answers replayed locally. No provider calls or file changes. Threshold controls affect this explorer only.';
   } catch (error) {
+    $('evidence-empty').hidden = false;
     $('recorded-status').textContent = error.name === 'TimeoutError' ? 'Recorded experiment timed out. Try again.' : 'Recorded experiment unavailable. Try again.';
-  } finally { button.disabled = false; }
+  } finally {
+    controls.forEach(c => { c.disabled = false; });
+    $('recorded-threshold').disabled = $('recorded-reset').disabled = !recordedReport;
+    if (focusedControl && document.activeElement === document.body) {
+      (focusedControl.disabled ? $('load-recorded') : focusedControl).focus({ preventScroll: true });
+    }
+  }
+}
+$('load-recorded').addEventListener('click', loadRecorded);
+$('recorded-experiment').addEventListener('change', () => {
+  recordedReport = null; exploredThreshold = undefined;
+  $('evidence-empty').hidden = false;
+  $('recorded-results').hidden = true;
+  $('recorded-filter').value = 'all';
+  $('recorded-threshold').value = 0.8; $('recorded-threshold-value').value = '0.80';
+  $('recorded-threshold').disabled = $('recorded-reset').disabled = true;
+  $('recorded-status').textContent = 'Experiment changed. Load its recorded answers to continue.';
+});
+$('recorded-threshold').addEventListener('input', () => {
+  $('recorded-threshold-value').value = Number($('recorded-threshold').value).toFixed(2);
+});
+$('recorded-threshold').addEventListener('change', () => {
+  exploredThreshold = Number($('recorded-threshold').value); loadRecorded();
+});
+$('recorded-reset').addEventListener('click', () => {
+  exploredThreshold = undefined; loadRecorded();
+});
+
+function resetAgent() {
+  $('agent-result').hidden=true;$('agent-empty').hidden=false;
+  $('agent-status').textContent='Inputs changed. Run again to inspect this task.';
+  $('agent-status').dataset.state='ready';
+}
+$('agent-form').addEventListener('input',resetAgent);
+document.querySelectorAll('[data-agent-sample]').forEach(button=>button.addEventListener('click',()=>{$('agent-text').value=button.dataset.agentSample;resetAgent();}));
+let agentPending=false;
+$('agent-form').addEventListener('submit',async event=>{
+  event.preventDefault();if(agentPending)return;
+  resetAgent();agentPending=true;
+  const input={text:$('agent-text').value,mode:$('agent-mode').value,threshold:.8,execute:$('agent-execute').checked};
+  const controls=[...$('agent-form').querySelectorAll('input,textarea,select,button')];
+  controls.forEach(control=>{control.disabled=true;});
+  $('agent-status').textContent='Running the offline harness…';
+  try {
+    const response=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(10000)});
+    if(!response.ok)throw Error('Request failed');
+    const result=await response.json();
+    $('agent-status').textContent=`${result.mode==='preview'?'Request preview':'Deterministic baseline'} · 0 provider calls · Not a Jev observation`;
+    $('agent-outcome').textContent={preview:'Request prepared',suggested:'Local operation suggested',completed:'Local operation completed',handoff:'LLM handoff — not connected',human_review:'Stopped for human review'}[result.status];
+    $('agent-reason').textContent=result.decision?`${result.decision.route} · ${result.decision.reason}`:'No decision or policy applied.';
+    $('agent-output').textContent=result.execution.performed?JSON.stringify(result.execution.output,null,2):'No operation performed.';
+    $('agent-trace').replaceChildren(...result.trace.map(item=>traceItem(item.stage,item.detail)));
+    $('agent-json').textContent=JSON.stringify(result,null,2);
+    $('agent-empty').hidden=true;$('agent-result').hidden=false;
+  } catch {
+    $('agent-status').textContent='Could not complete the offline run. Check the local server and task, then try again.';
+    $('agent-status').dataset.state='error';
+  } finally {agentPending=false;controls.forEach(control=>{control.disabled=false;});}
 });
