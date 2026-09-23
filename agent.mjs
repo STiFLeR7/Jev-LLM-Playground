@@ -47,8 +47,9 @@ export function baselineRoute(text) {
   return operation(text)?.route ?? (/^(draft|explain|compare):\s*\S/i.test(text.trim())?'llm':'human_review');
 }
 
-export async function runAgent(input, {apiKey,budget,fetchImpl=fetch}={}) {
-  check(input && !Array.isArray(input) && Object.keys(input).sort().join(',')==='execute,mode,text,threshold');
+export async function runAgent(input, {apiKey,budget,nimKey,fetchImpl=fetch}={}) {
+  check(input && !Array.isArray(input) && ['execute,mode,text,threshold','execute,mode,nim,text,threshold'].includes(Object.keys(input).sort().join(',')));
+  check(input.nim===undefined || typeof input.nim==='boolean');
   check(['preview','baseline','live'].includes(input.mode) && probability(input.threshold) && typeof input.execute==='boolean');
   const request=agentRequest(input.text);
   const trace=[{stage:'input',detail:'Validated bounded task and explicit execution consent.'},{stage:'request',detail:'Defined route, approval-needed and complexity questions.'}];
@@ -84,22 +85,45 @@ export async function runAgent(input, {apiKey,budget,fetchImpl=fetch}={}) {
   if (local && ['tool','workflow'].includes(route) && input.execute) {
     result.execution={performed:true,operation:local.name,output:local.run()}; status='completed';
   }
+  if (route==='llm' && input.execute && input.nim) {
+    check(typeof nimKey==='string' && /^[\x21-\x7e]{1,4096}$/.test(nimKey) && !nimKey.startsWith('replace_with_'),'NVIDIA credential missing or invalid.');
+    const model='nvidia/nemotron-3-super-120b-a12b', start=performance.now();
+    try {
+      const response=await fetchImpl('https://integrate.api.nvidia.com/v1/chat/completions',{
+        method:'POST',redirect:'error',signal:AbortSignal.timeout(30000),
+        headers:{Authorization:`Bearer ${nimKey}`,'Content-Type':'application/json'},
+        body:JSON.stringify({model,messages:[{role:'system',content:'Respond concisely to the task with text only. You have no tools and cannot perform external actions. Do not claim to have executed actions.'},{role:'user',content:input.text}],max_tokens:512,temperature:1,top_p:.95,stream:false,chat_template_kwargs:{enable_thinking:false}}),
+      });
+      check(response.ok && response.status===200);
+      const data=await response.json(), choice=data.choices?.[0], usage=data.usage;
+      check(data.model===model && data.choices?.length===1 && choice.message?.role==='assistant');
+      check(typeof choice.message.content==='string' && choice.message.content.trim() && choice.message.content.length<=32768);
+      check(!choice.message.tool_calls?.length && !choice.message.function_call && ['stop','length'].includes(choice.finish_reason));
+      check(usage && ['prompt_tokens','completion_tokens','total_tokens'].every(k=>Number.isSafeInteger(usage[k])&&usage[k]>=0));
+      check(usage.completion_tokens<=512 && usage.total_tokens===usage.prompt_tokens+usage.completion_tokens);
+      result.llm={provider:'nvidia',model,finish_reason:choice.finish_reason,usage:{prompt_tokens:usage.prompt_tokens,completion_tokens:usage.completion_tokens,total_tokens:usage.total_tokens},latency_ms:Math.round(performance.now()-start),cost_usd:null};
+      result.api_calls++;
+      result.execution={performed:true,operation:'nvidia_text',output:choice.message.content};
+      status='completed';
+    } catch { throw Error('NVIDIA request failed or returned an invalid response. No retry or fallback.'); }
+  }
   trace.push({stage:'source',detail:input.mode==='live'?'Validated Jev observation.':'Deterministic baseline; not a Jev answer, no confidence score.'},
     {stage:'policy',detail:`${route}: ${reason}. Execution consent: ${input.execute}.`},
-    {stage:'execution',detail:status==='completed'?`Completed one local ${local.name} operation.`:status==='handoff'?'LLM handoff only. No reasoning provider connected or called.':'No operation performed.'},
+    {stage:'execution',detail:status==='completed'?`Completed one ${result.execution.operation} operation. Output is not executed.`:status==='handoff'?'LLM handoff only. Enable NVIDIA and execution consent to send this task.':'No operation performed.'},
     {stage:'completion',detail:status==='human_review'?'Stopped for review; no external notification sent.':'Harness finished; no recursive planning.'});
   return {...result,status};
 }
 
 async function main() {
-  const {values,positionals}=parseArgs({allowPositionals:true,options:{text:{type:'string'},baseline:{type:'boolean'},live:{type:'boolean'},execute:{type:'boolean'},threshold:{type:'string'},'budget-usd':{type:'string'},out:{type:'string'},help:{type:'boolean'}}});
+  const {values,positionals}=parseArgs({allowPositionals:true,options:{text:{type:'string'},baseline:{type:'boolean'},live:{type:'boolean'},execute:{type:'boolean'},nim:{type:'boolean'},threshold:{type:'string'},'budget-usd':{type:'string'},out:{type:'string'},help:{type:'boolean'}}});
   if (values.help) {
-    console.log('Preview: node agent.mjs --text "calculate: 12 + 3"\nBaseline: node agent.mjs --baseline --execute --text "calculate: 12 + 3"\nLive: node --env-file=.env agent.mjs --live --budget-usd 0.05 --out results/new-agent-run.json --text "Task"\nOptional: --threshold 0.8; --out NEW_FILE saves an exclusive report. No retries. Live requires existing results/benchmark-spend.jsonl and uses its cumulative cap. LLM handoffs are not connected.'); return;
+    console.log('Preview: node agent.mjs --text "calculate: 12 + 3"\nBaseline: node agent.mjs --baseline --execute --text "calculate: 12 + 3"\nLive: node --env-file=.env agent.mjs --live --budget-usd 0.05 --out results/new-agent-run.json --text "Task"\nOptional: --threshold 0.8; --out NEW_FILE saves an exclusive report. No retries. Live requires existing results/benchmark-spend.jsonl and uses its cumulative cap. Use --nim --execute to enable one NVIDIA text handoff; requires NVIDIA_NIM_API_KEY.'); return;
   }
   check(!positionals.length && !(values.live&&values.baseline));
+  check(!values.nim || (values.execute && (values.baseline || values.live)),'NVIDIA requires --execute and --baseline or --live.');
   check(values.threshold===undefined || values.threshold.trim()!=='');
   check(values.live ? values['budget-usd']==='0.05'&&values.out : values['budget-usd']===undefined);
-  const input={text:values.text,mode:values.live?'live':values.baseline?'baseline':'preview',threshold:Number(values.threshold??.8),execute:Boolean(values.execute)};
+  const input={text:values.text,mode:values.live?'live':values.baseline?'baseline':'preview',threshold:Number(values.threshold??.8),execute:Boolean(values.execute),nim:Boolean(values.nim)};
   agentRequest(input.text);check(probability(input.threshold));
   const apiKey=process.env.TYPESAFE_API_KEY||process.env.JEV_LLM_API;
   if(values.live) check(apiKey && apiKey!=='replace_with_your_typesafe_key','Missing environment credential.');
@@ -120,7 +144,7 @@ async function main() {
       budget=await openBudget(ledger,values['budget-usd'],{existingOnly:true});
       report.budget_before=budget.snapshot();await save(report);
     }
-    report.result=await runAgent(input,{apiKey,budget});report.status='completed';
+    report.result=await runAgent(input,{apiKey,budget,nimKey:process.env.NVIDIA_NIM_API_KEY});report.status='completed';
     if(budget) report.budget_after=budget.snapshot();
     await save(report);
     console.log(JSON.stringify(values.out?report:report.result,null,2));

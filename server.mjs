@@ -8,7 +8,7 @@ import { runAgent } from './agent.mjs';
 
 const loadRecordedReport = async (id = 'legacy') => JSON.parse(await readFile(new URL(`./doc/results/${evidenceFiles[id]}`, import.meta.url), 'utf8'));
 
-export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY || process.env.JEV_LLM_API, evaluate = evaluateTicket, readReport = loadRecordedReport } = {}) {
+export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY || process.env.JEV_LLM_API, nimKey = process.env.NVIDIA_NIM_API_KEY, fetchImpl = fetch, evaluate = evaluateTicket, readReport = loadRecordedReport } = {}) {
   let busy = false;
   const assets = { '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css'] };
   return createServer(async (req, res) => {
@@ -55,8 +55,12 @@ export function createPlaygroundServer({ apiKey = process.env.TYPESAFE_API_KEY |
       try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(400, { error: 'Invalid JSON.' }); }
       if (req.url === '/api/agent') {
         if (!['preview','baseline'].includes(input?.mode)) return send(400, {error:'Agent Lab supports offline preview and baseline only. Use the budgeted CLI for live Jev.'});
-        try { return send(200, await runAgent(input)); }
+        if (input.nim && req.headers.origin !== `http://${host}`) return send(403, {error:'Local same-origin requests only.'});
+        if (busy) return send(429, {error:'A request is already running. Please wait.'});
+        busy=true;
+        try { return send(200, await runAgent(input,{nimKey,fetchImpl})); }
         catch { return send(400, {error:'Invalid agent task or options. Use 1–4,000 characters and the documented controls.'}); }
+        finally {busy=false;}
       }
       if (req.url === '/api/key') {
         if (!input || Array.isArray(input) || Object.keys(input).length !== 1 || !Object.hasOwn(input, 'apiKey') || (input.apiKey !== null && (typeof input.apiKey !== 'string' || !/^[\x21-\x7e]{1,4096}$/.test(input.apiKey) || input.apiKey === 'replace_with_your_typesafe_key'))) return send(400, { error: 'Enter a key without spaces, up to 4096 characters.' });

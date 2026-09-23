@@ -64,4 +64,4 @@ The v0.2.0 benchmark and [v0.3.0 challenge benchmark](https://github.com/STiFLeR
 
 ## 6. Next: connected reasoning and independent evidence
 
-Select a reasoning provider/model and spending/data policy before connecting an actual LLM. Human-adjudicated agent-routing labels, semantic comparisons and document operations remain future work. No latency/cost benefit or production reliability is established by this milestone.
+The opt-in [NVIDIA text handoff](../docs/04-recipes/nvidia-handoff.md) is implemented with fixed endpoint/model, consent, timeout and output limits. Nemotron 3 Super was verified through both baseline routing and a live Jev-to-Nemotron CLI run on 2026-09-23; see the [verification record](../docs/verification/2026-09-23-nvidia-handoff.md). Human-adjudicated agent-routing labels, semantic comparisons and document operations remain future work. No latency/cost benefit or production reliability is established by this milestone.

@@ -69,7 +69,7 @@ Omit `--live` for a request preview. The key stays on the server; live ticket te
 
 ## Agent Lab — a bounded agent harness
 
-The **Agent Lab** workspace previews decision requests and runs an offline routing baseline with explicit consent for one local calculation, word count, or checklist transformation. It shows the policy and execution trace. General-purpose LLM routes stop at an explicitly unconnected handoff; no chat response is fabricated.
+The **Agent Lab** workspace previews decision requests and runs a deterministic routing baseline with explicit consent for one local calculation, word count, or checklist transformation. It shows the policy and execution trace. Optional [NVIDIA text handoffs](docs/04-recipes/nvidia-handoff.md) require separate opt-in and a server-side key; preview stays offline. Live Jev routing remains in the budgeted CLI.
 
 ```sh
 node agent.mjs --baseline --execute --text "calculate: 12 + 3"

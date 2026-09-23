@@ -117,21 +117,22 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <div class="workspace">
         <section class="control-panel">
           <div class="section-heading"><h1 id="agent-title" tabindex="-1">Agent Lab</h1><p>A bounded harness. Every decision visible.</p></div>
-          <div class="mode-note"><span class="local-dot"></span> Offline lab · No provider calls</div>
+          <div class="mode-note"><span class="local-dot"></span> Offline routing · Optional NVIDIA handoff</div>
           <form id="agent-form">
             <label for="agent-text">Task</label><textarea id="agent-text" rows="5" required maxlength="4000" aria-describedby="agent-help">calculate: 12 + 3</textarea>
             <p id="agent-help" class="hint">Exact local syntax: calculate: 12 + 3 · count words: your text · checklist: first; second.</p>
             <div class="samples"><button type="button" data-agent-sample="calculate: 12 + 3">Calculate</button><button type="button" data-agent-sample="checklist: inspect; test; document">Checklist</button><button type="button" data-agent-sample="draft: a friendly greeting">LLM handoff</button></div>
             <div class="form-section"><label for="agent-mode">Decision source</label><select id="agent-mode"><option value="preview">Request preview</option><option value="baseline">Deterministic baseline</option></select><p class="hint">The baseline is an explicit-syntax rule, not a Jev observation.</p></div>
-            <div class="form-section"><label class="check"><input id="agent-execute" type="checkbox"> Allow one local operation</label><p class="hint">Pure calculation, word count or checklist only. No files, network calls, shell commands or external actions.</p></div>
-            <button id="agent-submit" class="primary" type="submit">Run offline harness</button>
+            <div class="form-section"><label class="check"><input id="agent-execute" type="checkbox"> Allow one operation</label><p class="hint">Pure local utility, or one text response when NVIDIA is also enabled. Generated text is never executed.</p></div>
+            <div class="form-section"><label class="check"><input id="agent-nim" type="checkbox" aria-describedby="agent-nim-help"> Enable NVIDIA text handoff</label><p id="agent-nim-help" class="hint">Sends this task to NVIDIA only for an LLM route with execution allowed. Uses the server-side NVIDIA_NIM_API_KEY, Nemotron 3 Super, and at most 512 output tokens. Free prototyping is subject to your NVIDIA account limits. No retries or paid fallback. Do not send secrets.</p></div>
+            <button id="agent-submit" class="primary" type="submit">Run harness</button>
           </form>
-          <p class="scope-note">Live Jev is available through the budgeted CLI. The reasoning LLM is not connected. <a href="#learn">Learn the boundaries</a>.</p>
+          <p class="scope-note">Live Jev is available through the budgeted CLI. NVIDIA text generation requires separate consent. <a href="#learn">Learn the boundaries</a>.</p>
         </section>
         <section class="result-canvas" aria-label="Agent harness results">
           <div class="canvas-heading"><h2>Harness trace</h2><span class="tag">Bounded execution</span></div>
           <div class="result"><p id="agent-status" class="status-line" role="status" aria-live="polite">Ready. Preview the gate or try the offline baseline.</p>
-            <div id="agent-empty" class="empty-state"><h3>Route first. Execute deliberately.</h3><p>The gate suggests a handler. Application policy checks the operation and your consent before anything runs.</p><p class="hint">Task → decision → policy → local result<br>LLM handoff stops without a provider call.</p></div>
+            <div id="agent-empty" class="empty-state"><h3>Route first. Execute deliberately.</h3><p>The gate suggests a handler. Application policy checks the operation and your consent before anything runs.</p><p class="hint">Task → decision → policy → result<br>NVIDIA stays off until explicitly enabled. Preview never calls a provider.</p></div>
             <div id="agent-result" hidden><h3 id="agent-outcome"></h3><p id="agent-reason" class="hint"></p><h4>Execution result</h4><pre id="agent-output"></pre><h4>Application trace</h4><ol id="agent-trace"></ol><details><summary>Inspect harness JSON</summary><pre id="agent-json"></pre></details></div>
           </div><p class="canvas-footer">This harness is not a safety classifier or production agent. No hidden reasoning or simulated provider answers.</p>
         </section>

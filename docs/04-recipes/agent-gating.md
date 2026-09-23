@@ -1,6 +1,6 @@
 # Agent routing gate
 
-A bounded harness asks a routing question, validates the answer, applies application policy, and optionally returns one local operation's result. The browser's **Agent Lab** is entirely offline. This recipe is independent of the support-ticket benchmark.
+A bounded harness asks a routing question, validates the answer, applies application policy, and optionally returns one operation's result. The browser's **Agent Lab** is offline by default, with an opt-in [NVIDIA text handoff](nvidia-handoff.md). This recipe is independent of the support-ticket benchmark.
 
 ## Try it without a key
 
@@ -13,9 +13,9 @@ node agent.mjs --baseline --execute --text "draft: a friendly greeting"
 node agent-eval.mjs
 ```
 
-The first command previews a request. The second suggests a utility without running it. The third returns 15. The checklist is a local array, not tasks created elsewhere. The draft produces an **LLM handoff — not connected**, not generated prose. All commands above make zero provider calls.
+The first command previews a request. The second suggests a utility without running it. The third returns 15. The checklist is a local array, not tasks created elsewhere. The draft produces an **LLM handoff — not executed**, not generated prose. All commands above make zero provider calls.
 
-Run `npm start` and select **Agent Lab** for the same preview/baseline flow. Enable **Allow one local operation** only when you want execution. The result explains each application step; it does not expose hidden reasoning. The baseline is a syntax rule, not a Jev prediction.
+Run `npm start` and select **Agent Lab** for the same preview/baseline flow. Enable **Allow one operation** only when you want execution. The result explains each application step; it does not expose hidden reasoning. The baseline is a syntax rule, not a Jev prediction.
 
 ## Supported operations
 
@@ -60,10 +60,10 @@ To save an offline report explicitly, use `node agent-eval.mjs --out results/new
 ```text
 Input → harness → decision source → validation → policy
                                                 ├─ pure local operation → result
-                                                ├─ LLM handoff (not connected)
+                                                ├─ LLM handoff (opt-in NVIDIA)
                                                 └─ human review (stop)
 ```
 
-The harness terminates after one decision and at most one local operation. It has no iterative planner, memory store, arbitrary tool registry or production safety claim. Connecting a real reasoning model requires a selected provider/model and explicit spending/data policy. The current recipe establishes the boundary without pretending that integration exists.
+The harness terminates after one decision and at most one operation. It has no iterative planner, memory store, arbitrary tool registry or production safety claim. The optional NVIDIA handoff produces text only; its output is never executed.
 
 [Detailed specification](../superpowers/specs/2026-09-22-agent-harness-design.md) · [Implementation plan](../superpowers/plans/2026-09-22-agent-harness.md)

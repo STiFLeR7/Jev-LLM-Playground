@@ -326,23 +326,23 @@ let agentPending=false;
 $('agent-form').addEventListener('submit',async event=>{
   event.preventDefault();if(agentPending)return;
   resetAgent();agentPending=true;
-  const input={text:$('agent-text').value,mode:$('agent-mode').value,threshold:.8,execute:$('agent-execute').checked};
+  const input={text:$('agent-text').value,mode:$('agent-mode').value,threshold:.8,execute:$('agent-execute').checked,nim:$('agent-nim').checked};
   const controls=[...$('agent-form').querySelectorAll('input,textarea,select,button')];
   controls.forEach(control=>{control.disabled=true;});
-  $('agent-status').textContent='Running the offline harness…';
+  $('agent-status').textContent='Running the harness; an enabled NVIDIA handoff may take up to 30 seconds…';
   try {
-    const response=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(10000)});
+    const response=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:AbortSignal.timeout(35000)});
     if(!response.ok)throw Error('Request failed');
     const result=await response.json();
-    $('agent-status').textContent=`${result.mode==='preview'?'Request preview':'Deterministic baseline'} · 0 provider calls · Not a Jev observation`;
-    $('agent-outcome').textContent={preview:'Request prepared',suggested:'Local operation suggested',completed:'Local operation completed',handoff:'LLM handoff — not connected',human_review:'Stopped for human review'}[result.status];
+    $('agent-status').textContent=`${result.mode==='preview'?'Request preview':'Deterministic baseline'} · ${result.api_calls} provider calls · Not a Jev observation`;
+    $('agent-outcome').textContent={preview:'Request prepared',suggested:'Local operation suggested',completed:result.llm?'NVIDIA text response received':'Local operation completed',handoff:'LLM handoff — not executed',human_review:'Stopped for human review'}[result.status];
     $('agent-reason').textContent=result.decision?`${result.decision.route} · ${result.decision.reason}`:'No decision or policy applied.';
-    $('agent-output').textContent=result.execution.performed?JSON.stringify(result.execution.output,null,2):'No operation performed.';
+    $('agent-output').textContent=result.execution.performed?(typeof result.execution.output==='string'?result.execution.output:JSON.stringify(result.execution.output,null,2)):'No operation performed.';
     $('agent-trace').replaceChildren(...result.trace.map(item=>traceItem(item.stage,item.detail)));
     $('agent-json').textContent=JSON.stringify(result,null,2);
     $('agent-empty').hidden=true;$('agent-result').hidden=false;
   } catch {
-    $('agent-status').textContent='Could not complete the offline run. Check the local server and task, then try again.';
+    $('agent-status').textContent='Run failed; no automatic retry. Check the task, server-side NVIDIA key and account access. A dispatched request may have consumed quota.';
     $('agent-status').dataset.state='error';
   } finally {agentPending=false;controls.forEach(control=>{control.disabled=false;});}
 });

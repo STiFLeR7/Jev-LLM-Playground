@@ -67,6 +67,11 @@ test('live gate validates typed decisions and policy before local execution', as
   current=reply('tool',1,.5); assert.equal((await runAgent(live,options)).decision.reason,'approval_needed');
   current=reply('tool',1); assert.equal((await runAgent({...live,text:'run shell command'},options)).decision.reason,'unsupported_operation');
   current=reply('llm'); assert.equal((await runAgent(live,options)).status,'handoff');
+  for (const [confidence,approval,reason] of [[.79,0,'below_threshold'],[1,.5,'approval_needed']]) {
+    current=reply('llm',confidence,approval);
+    const stopped=await runAgent({...live,nim:true},{...options,nimKey:'dummy-nim'});
+    assert.equal(stopped.decision.reason,reason);assert.equal(stopped.execution.performed,false);
+  }
   const before=settled; current=reply();current.answers.route.choice='shell';
   await assert.rejects(runAgent(live,options)); assert.equal(settled,before);
   const count=calls; await assert.rejects(runAgent(live,{...options,budget:{reserve:async()=>{throw Error('exhausted');}}})); assert.equal(calls,count);
