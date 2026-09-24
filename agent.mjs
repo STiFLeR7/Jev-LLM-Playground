@@ -47,6 +47,24 @@ export function baselineRoute(text) {
   return operation(text)?.route ?? (/^(draft|explain|compare):\s*\S/i.test(text.trim())?'llm':'human_review');
 }
 
+export function applyAgentPolicy(text, observation, threshold=.8) {
+  agentRequest(text);
+  check(probability(threshold));
+  check(observation && !Array.isArray(observation) && Object.keys(observation).sort().join(',')==='approval_needed,confidence,route');
+  const {route,approval_needed,confidence}=observation;
+  check(['tool','workflow','llm','human_review'].includes(route));
+  check(approval_needed===null || probability(approval_needed));
+  check(confidence===null || probability(confidence));
+  const predicates={
+    approval:approval_needed===null?null:approval_needed>=.5,
+    explicit_review:route==='human_review',
+    below_threshold:confidence===null?null:confidence<threshold,
+    unsupported_operation:['tool','workflow'].includes(route) && operation(text)?.route!==route,
+  };
+  const reason=predicates.approval?'approval_needed':predicates.explicit_review?'model_review':predicates.below_threshold?'below_threshold':predicates.unsupported_operation?'unsupported_operation':'threshold_met';
+  return {route:reason==='threshold_met'?route:'human_review',reason,predicates};
+}
+
 export async function runAgent(input, {apiKey,budget,nimKey,fetchImpl=fetch}={}) {
   check(input && !Array.isArray(input) && ['execute,mode,text,threshold','execute,mode,nim,text,threshold'].includes(Object.keys(input).sort().join(',')));
   check(input.nim===undefined || typeof input.nim==='boolean');
@@ -73,13 +91,11 @@ export async function runAgent(input, {apiKey,budget,nimKey,fetchImpl=fetch}={})
       result.api_calls=1;
     } catch { throw Error('Provider request failed or returned an invalid response. No execution. Reservation retained unless already settled.'); }
     const {route:answer,approval_needed}=result.observation.answers;
-    route=answer.choice; reason='threshold_met';
-    if (approval_needed.noul>=.5) {route='human_review';reason='approval_needed';}
-    else if (route==='human_review') reason='model_review';
-    else if (answer.confidence<input.threshold) {route='human_review';reason='below_threshold';}
+    const routed=applyAgentPolicy(input.text,{route:answer.choice,approval_needed:approval_needed.noul,confidence:answer.confidence},input.threshold);
+    route=routed.route; reason=routed.reason;
   }
   const local=operation(input.text);
-  if (['tool','workflow'].includes(route) && local?.route!==route) {route='human_review';reason='unsupported_operation';}
+  if (input.mode==='baseline' && ['tool','workflow'].includes(route) && local?.route!==route) {route='human_review';reason='unsupported_operation';}
   result.decision={route,reason,threshold:input.threshold};
   let status=route==='human_review'?'human_review':route==='llm'?'handoff':'suggested';
   if (local && ['tool','workflow'].includes(route) && input.execute) {

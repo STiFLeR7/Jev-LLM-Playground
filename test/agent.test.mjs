@@ -5,7 +5,31 @@ import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openBudget } from '../budget.mjs';
-import { runAgent, agentQuestions } from '../agent.mjs';
+import { runAgent, agentQuestions, applyAgentPolicy } from '../agent.mjs';
+
+test('shared agent policy reports independent predicates and enforces precedence', () => {
+  assert.equal(applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:.5,confidence:.8}).reason, 'approval_needed');
+  assert.equal(applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:0,confidence:.8}).route, 'tool');
+  assert.equal(applyAgentPolicy('calculate: 2 / 0', {route:'tool',approval_needed:0,confidence:1}).reason, 'unsupported_operation');
+  assert.throws(() => applyAgentPolicy('x', {route:'shell',approval_needed:null,confidence:null}));
+  assert.deepEqual(applyAgentPolicy('calculate: 2 / 0', {route:'tool',approval_needed:.5,confidence:1}).predicates, {
+    approval:true, explicit_review:false, below_threshold:false, unsupported_operation:true,
+  });
+  assert.deepEqual(applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:null,confidence:null}).predicates, {
+    approval:null, explicit_review:false, below_threshold:null, unsupported_operation:false,
+  });
+  assert.equal(applyAgentPolicy('x', {route:'human_review',approval_needed:0,confidence:.1}).reason,'model_review');
+  for (const observation of [
+    {route:'tool',approval_needed:NaN,confidence:.8},
+    {route:'tool',approval_needed:-.1,confidence:.8},
+    {route:'tool',approval_needed:0,confidence:Infinity},
+    {route:'tool',approval_needed:0,confidence:1.1},
+    {route:'tool',approval_needed:0,confidence:.8,extra:true},
+    {route:'tool',confidence:.8},
+  ]) assert.throws(() => applyAgentPolicy('x',observation));
+  for (const text of ['',42,'x'.repeat(4001)]) assert.throws(() => applyAgentPolicy(text,{route:'tool',approval_needed:0,confidence:.8}));
+  assert.throws(() => applyAgentPolicy('x',{route:'tool',approval_needed:0,confidence:.8},NaN));
+});
 
 const input = (text, extras = {}) => ({text,mode:'baseline',threshold:.8,execute:false,...extras});
 test('agent CLI is offline by default and rejects ambiguous paid modes', () => {
@@ -65,6 +89,7 @@ test('live gate validates typed decisions and policy before local execution', as
   current=reply('tool',.79); assert.equal((await runAgent(live,options)).decision.reason,'below_threshold');
   current=reply('tool',.8); assert.equal((await runAgent(live,options)).status,'completed');
   current=reply('tool',1,.5); assert.equal((await runAgent(live,options)).decision.reason,'approval_needed');
+  assert.deepEqual(Object.keys((await runAgent(live,options)).decision).sort(),['reason','route','threshold']);
   current=reply('tool',1); assert.equal((await runAgent({...live,text:'run shell command'},options)).decision.reason,'unsupported_operation');
   current=reply('llm'); assert.equal((await runAgent(live,options)).status,'handoff');
   for (const [confidence,approval,reason] of [[.79,0,'below_threshold'],[1,.5,'approval_needed']]) {
