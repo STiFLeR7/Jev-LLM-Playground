@@ -34,8 +34,10 @@ export async function loadExperiment(configPath) {
   return { config, cases, datasetBytes };
 }
 
-export function classificationMetrics(rows) {
-  const labels = Object.keys(questions.department.criteria);
+export function classificationMetrics(rows, labels = Object.keys(questions.department.criteria)) {
+  if (!Array.isArray(labels) || !labels.length ||
+      labels.some(label => typeof label !== 'string' || !label.trim()) ||
+      new Set(labels).size !== labels.length) throw new Error('Invalid classification labels.');
   const confusion_matrix = Object.fromEntries(labels.map(label => [label, Object.fromEntries(labels.map(key => [key, 0]))]));
   const support = Object.fromEntries(labels.map(label => [label, 0]));
   let successful = 0, correct = 0;

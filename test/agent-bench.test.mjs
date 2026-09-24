@@ -4,7 +4,82 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadAgentExperiment, validateAgentDataset } from '../agent-bench.mjs';
+import { loadAgentExperiment, validateAgentDataset, parseRoutingAnswer, summarizeAgentRows } from '../agent-bench.mjs';
+import { applyAgentPolicy } from '../agent.mjs';
+
+test('routing answer is bounded exact JSON with boolean approval and no invented confidence', () => {
+  assert.deepEqual(parseRoutingAnswer('{"route":"llm","approval_needed":false}'), {route:'llm',approval_needed:false});
+  for (const text of ['```json\n{"route":"llm","approval_needed":false}\n```',
+    '{"route":"llm","approval_needed":"false"}',
+    '{"route":"llm","approval_needed":false,"confidence":1}',
+    '{"route":"shell","approval_needed":false}', '{"route":"llm","approval_needed":false,"route":"tool"}',
+    '{"route":"llm","approval_needed":false,"\\u0072oute":"tool"}',
+    '', 'x'.repeat(1001)]) assert.throws(() => parseRoutingAnswer(text));
+  assert.deepEqual(parseRoutingAnswer('{"route":"tool","approval_needed":true}'), {route:'tool',approval_needed:true});
+});
+
+const row = (id, family_id, text, expected_route, baseline, observation, status='ok', pair_relation='different_route') => ({
+  id,family_id,text,expected_route,baseline,observation,status,pair_relation,
+  stratum:'clear',reference_status:'author_only',
+  final:status==='ok' ? applyAgentPolicy(text,{route:observation.route,approval_needed:Number(observation.approval_needed),confidence:null}) : null,
+});
+const five = () => [
+  row('one','pair-a','Please draft a greeting','llm','human_review',{route:'llm',approval_needed:false}),
+  row('two','pair-a','calculate: 2 / 0','human_review','human_review',{route:'tool',approval_needed:false}),
+  row('three','pair-b','draft: a greeting','llm','llm',{route:'llm',approval_needed:true},'ok','same_route'),
+  row('four','pair-b','draft: a farewell','llm','llm',null,'error','same_route'),
+  row('five','pair-c','calculate: 2 + 2','tool','tool',null,'not_attempted','same_route'),
+];
+
+test('metrics keep scheduled errors, capability catches, avoidable reviews and baseline gain distinct', () => {
+  const rows=five(), m=summarizeAgentRows(rows);
+  assert.equal(m.scheduled,5);assert.equal(m.successful,3);assert.equal(m.error,1);assert.equal(m.not_attempted,1);
+  assert.equal(m.automatic,1);assert.equal(m.coverage,.2);
+  assert.equal(m.attribution.caught_wrong_auto,1);assert.equal(m.attribution.unnecessary_review,1);
+  assert.equal(m.wrong_automatic,0);assert.equal(m.attribution.surviving_wrong_auto,0);
+  assert.equal(m.attribution.correct_auto_gained,1);assert.equal(m.attribution.correct_auto_lost,1);
+  assert.equal(m.raw.confusion_matrix.human_review.tool,1);
+  assert.equal(m.final.confusion_matrix.llm.human_review,1);
+  assert.equal(m.correct_per_scheduled,2/5);
+  assert.equal(m.review.precision,.5);assert.equal(m.review.recall,1);
+  assert.equal(m.always_review.coverage,0);assert.equal(m.always_review.wrong_automatic,0);
+  assert.equal(m.by_reference_status.agreed.scheduled,0);
+  assert.equal(m.by_reference_status.agreed.correct_per_scheduled,null);
+  assert.equal(m.by_stratum.clear.scheduled,5);
+  assert.equal(m.pairs.complete,1);assert.equal(m.pairs.excluded,2);
+  assert.equal(m.repetition.raw_consistency,null);
+  rows.push(row('six','pair-c','calculate: 3 + 3','tool','tool',{route:'llm',approval_needed:false},'ok','same_route'));
+  const six=summarizeAgentRows(rows);
+  assert.equal(six.wrong_automatic,1);
+  assert.equal(six.attribution.surviving_wrong_auto,1);
+  assert.equal(six.attribution.wrong_auto_introduced,1);
+  assert.equal(six.false_local_routes,0);
+});
+
+test('counterfactual gates replay in precedence order and pair correctness is separate from consistency', () => {
+  const rows=[
+    row('a','same','calculate: 1 / 0','human_review','human_review',{route:'tool',approval_needed:true},'ok','same_route'),
+    row('b','same','calculate: 2 / 0','human_review','human_review',{route:'tool',approval_needed:false},'ok','same_route'),
+    row('c','missing','draft: hi','llm','llm',null,'error','same_route'),
+    row('d','missing','draft: bye','llm','llm',{route:'llm',approval_needed:false},'ok','same_route'),
+  ];
+  const m=summarizeAgentRows(rows);
+  assert.equal(m.pairs.complete,1);assert.equal(m.pairs.excluded,1);
+  assert.equal(m.pairs.raw_consistent,1);assert.equal(m.pairs.raw_both_correct,0);
+  assert.equal(m.pairs.final_consistent,1);assert.equal(m.pairs.final_both_correct,1);
+  assert.equal(m.gates.overlap.approval_unsupported_operation,1);
+  assert.equal(m.gates.remove_approval.changed_to_automatic,0);
+  assert.equal(m.gates.remove_approval.reasons.unsupported_operation,2);
+  assert.equal(m.gates.remove_unsupported_operation.changed_to_automatic,1);
+  assert.equal(m.gates.remove_unsupported_operation.wrong_automatic,1);
+  const explicit=row('e','other','explain: hi','human_review','llm',{route:'human_review',approval_needed:false});
+  assert.equal(summarizeAgentRows([explicit]).gates.remove_explicit_review.changed_to_automatic,0);
+  assert.equal(summarizeAgentRows([]).coverage,null);
+  const baselineOnly=summarizeAgentRows([row('z','unattempted','draft: hi','llm','llm',null,'not_attempted')]);
+  assert.equal(baselineOnly.rules.accuracy,1);
+  assert.equal(baselineOnly.raw,null);assert.equal(baselineOnly.final,null);
+  assert.equal(baselineOnly.always_review.coverage,0);
+});
 
 test('versioned routing fixture has balanced paired splits', async () => {
   const { dataset, cases, config, hashes, datasetBytes, configBytes } = await loadAgentExperiment('experiments/agent-routing-v2.json');

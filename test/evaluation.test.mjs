@@ -46,6 +46,17 @@ test('class metrics separate failed attempts from observed predictions', () => {
   assert.throws(() => evaluation.classificationMetrics([{ expected: 'bad', prediction: null }]));
 });
 
+test('class metrics accept distinct custom route labels without changing support defaults', () => {
+  const support = evaluation.classificationMetrics([{expected:'billing',prediction:'billing'}]);
+  assert.deepEqual(Object.keys(support.confusion_matrix), ['billing','technical','sales','other']);
+  const route = evaluation.classificationMetrics([{expected:'tool',prediction:'llm'},{expected:'llm',prediction:null}], ['tool','llm']);
+  assert.equal(route.confusion_matrix.tool.llm, 1);
+  assert.equal(route.per_class.llm.support, 1);
+  assert.equal(route.errors, 1);
+  for (const labels of [[], ['tool','tool'], ['tool',''], ['tool',2], 'tool'])
+    assert.throws(() => evaluation.classificationMetrics([],labels));
+});
+
 test('config loader resolves relative datasets and rejects malformed or empty experiments', async t => {
   const dir = await mkdtemp(join(tmpdir(), 'jev-config-test-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
