@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadAgentExperiment, validateAgentDataset, parseRoutingAnswer, summarizeAgentRows } from '../agent-bench.mjs';
+import { loadAgentExperiment, validateAgentDataset, parseRoutingAnswer, summarizeAgentRows, buildRoutingPacket, replayAgentReport } from '../agent-bench.mjs';
+import { spawnSync } from 'node:child_process';
 import { applyAgentPolicy } from '../agent.mjs';
 
 test('routing answer is bounded exact JSON with boolean approval and no invented confidence', () => {
@@ -164,5 +165,100 @@ test('config is strict and dataset resolves beside config', async t => {
   for (const change of [c => { c.extra = true; }, c => { c.threshold = 2; }, c => { c.dataset = '../../other.json'; }, c => { c.requested_model = 'other'; }]) {
     const bad = structuredClone(config); change(bad); await writeFile(path, JSON.stringify(bad));
     await assert.rejects(loadAgentExperiment(path));
+  }
+});
+
+test('packet exposes only task and exact two-field answer contract', () => {
+  const packet = buildRoutingPacket('Please draft a welcome note.');
+  assert.ok(packet.includes('Please draft a welcome note.'));
+  assert.ok(packet.includes('1e12') && packet.includes('20 items') && packet.includes('200 characters'));
+  for (const forbidden of ['expected_route','reference_status','family_id','rationale']) assert.equal(packet.includes(forbidden), false);
+  assert.ok(packet.includes('"route"') && packet.includes('"approval_needed"'));
+});
+
+test('offline freeze, baseline, replay and exclusive output', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'agent-bench-cli-'));
+  t.after(async () => { const { rm } = await import('node:fs/promises'); await rm(root,{recursive:true,force:true}); });
+  const cli = (...args) => spawnSync(process.execPath,['agent-bench.mjs',...args],{encoding:'utf8'});
+  const freeze = join(root,'freeze.json'), baseline = join(root,'baseline.json');
+  assert.equal(cli('--freeze','experiments/agent-routing-v2.json','--out',freeze).status,0);
+  const frozen = JSON.parse(await readFile(freeze,'utf8'));
+  assert.equal(frozen.case_ids.length,48);
+  assert.equal(frozen.hashes.sources['agent-bench.mjs'].length,64);
+  assert.equal(createHash('sha256').update(Buffer.from(frozen.inputs.sources_base64['agent-bench.mjs'],'base64')).digest('hex'),
+    frozen.hashes.sources['agent-bench.mjs']);
+  assert.equal(cli('--baseline',freeze,'--out',baseline).status,0);
+  const report = JSON.parse(await readFile(baseline,'utf8'));
+  assert.equal(report.rows.length,48);
+  assert.equal(report.summary.not_attempted,48);
+  assert.deepEqual(replayAgentReport(report), report);
+  const sourceTamper = structuredClone(report);
+  sourceTamper.freeze.inputs.sources_base64['agent-bench.mjs'] = Buffer.from('changed').toString('base64');
+  assert.throws(()=>replayAgentReport(sourceTamper));
+  assert.equal(cli('--replay',baseline).status,0);
+  const bytes = await readFile(baseline);
+  assert.notEqual(cli('--baseline',freeze,'--out',baseline).status,0);
+  assert.deepEqual(await readFile(baseline),bytes);
+});
+
+test('journal import validates identity, order, metadata and interruption without fetch', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'agent-journal-'));
+  t.after(async () => { const { rm } = await import('node:fs/promises'); await rm(root,{recursive:true,force:true}); });
+  const cli = (...args) => spawnSync(process.execPath,['agent-bench.mjs',...args],{encoding:'utf8'});
+  const freezePath = join(root,'freeze.json'), journalPath = join(root,'journal.jsonl'), reportPath = join(root,'report.json');
+  assert.equal(cli('--freeze','experiments/agent-routing-v2.json','--out',freezePath).status,0);
+  const freeze = JSON.parse(await readFile(freezePath,'utf8'));
+  const now = '2026-09-24T00:00:00.000Z';
+  const header = {type:'header',schema_version:1,freeze_hash:freeze.artifact_hash,run_id:'run-1',created_at:now};
+  const pending = {type:'pending',case_id:freeze.case_ids[0],started_at:now};
+  const terminal = {type:'terminal',case_id:pending.case_id,session_id:'session-1',
+    requested_model:'gpt-6-luna',exposed_model:null,started_at:now,finished_at:now,
+    raw_final:'{"route":"tool","approval_needed":false}',status:'ok',tool_audit:'unverified',
+    usage_tokens:null,cost_usd:null};
+  const writeJournal = async records => writeFile(journalPath,records.map(r=>JSON.stringify(r)).join('\n')+'\n');
+  await writeJournal([header]);
+  assert.equal(cli('--check-journal',journalPath,'--freeze',freezePath).status,0);
+  await writeJournal([header,pending]);
+  assert.equal(cli('--check-journal',journalPath,'--freeze',freezePath).status,0);
+  assert.equal(cli('--import',journalPath,'--freeze',freezePath,'--out',reportPath).status,0);
+  let report = JSON.parse(await readFile(reportPath,'utf8'));
+  assert.equal(report.summary.error,1);assert.equal(report.summary.not_attempted,47);
+  assert.deepEqual(replayAgentReport(report),report);
+  const oldFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw Error('Network used.'); };
+  try {
+    assert.deepEqual(replayAgentReport(report),report);
+    const imported = await import(`../agent-bench.mjs?offline-probe=${Date.now()}`);
+    assert.equal(imported.buildRoutingPacket('draft: hi').includes('draft: hi'),true);
+  } finally { globalThis.fetch = oldFetch; }
+  const next = join(root,'next.json');
+  await writeJournal([header,pending,terminal]);
+  assert.equal(cli('--import',journalPath,'--freeze',freezePath,'--out',next).status,0);
+  report = JSON.parse(await readFile(next,'utf8'));
+  assert.equal(report.summary.successful,1);
+  assert.equal(report.provenance.tool_audit,'unverified');
+  assert.deepEqual(replayAgentReport(report),report);
+  const tampered = structuredClone(report);tampered.summary.successful = 2;
+  assert.throws(()=>replayAgentReport(tampered));
+  const tamperedHash = structuredClone(report);tamperedHash.journal_hash = '0'.repeat(64);
+  assert.throws(()=>replayAgentReport(tamperedHash));
+  const usedPath = join(root,'used.json');
+  await writeJournal([header,pending,{...terminal,tool_audit:'used'}]);
+  assert.equal(cli('--import',journalPath,'--freeze',freezePath,'--out',usedPath).status,0);
+  assert.equal(JSON.parse(await readFile(usedPath,'utf8')).summary.error,1);
+  await writeFile(journalPath,JSON.stringify(header));
+  assert.notEqual(cli('--check-journal',journalPath,'--freeze',freezePath).status,0);
+  for (const records of [
+    [{...header,freeze_hash:'0'.repeat(64)},pending],
+    [header,{...pending,authorization:'Bearer secret'}],
+    [header,terminal],
+    [header,pending,{...terminal,headers:{secret:'x'}}],
+    [header,pending,terminal,pending],
+    [header,{...pending,case_id:freeze.case_ids[1]}],
+    [header,pending,{...terminal,tool_audit:'used'},
+      {type:'pending',case_id:freeze.case_ids[1],started_at:now}],
+  ]) {
+    await writeJournal(records);
+    assert.notEqual(cli('--check-journal',journalPath,'--freeze',freezePath).status,0,JSON.stringify(records));
   }
 });
