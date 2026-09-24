@@ -12,10 +12,16 @@ test('shared agent policy reports independent predicates and enforces precedence
   assert.equal(applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:0,confidence:.8}).route, 'tool');
   assert.equal(applyAgentPolicy('calculate: 2 / 0', {route:'tool',approval_needed:0,confidence:1}).reason, 'unsupported_operation');
   assert.throws(() => applyAgentPolicy('x', {route:'shell',approval_needed:null,confidence:null}));
-  assert.deepEqual(applyAgentPolicy('calculate: 2 / 0', {route:'tool',approval_needed:.5,confidence:1}).predicates, {
+  const approvedUnsupported=applyAgentPolicy('calculate: 2 / 0', {route:'tool',approval_needed:.5,confidence:1});
+  assert.equal(approvedUnsupported.route,'human_review');
+  assert.equal(approvedUnsupported.reason,'approval_needed');
+  assert.deepEqual(approvedUnsupported.predicates, {
     approval:true, explicit_review:false, below_threshold:false, unsupported_operation:true,
   });
-  assert.deepEqual(applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:null,confidence:null}).predicates, {
+  const unavailable=applyAgentPolicy('calculate: 2 + 2', {route:'tool',approval_needed:null,confidence:null});
+  assert.equal(unavailable.route,'tool');
+  assert.equal(unavailable.reason,'threshold_met');
+  assert.deepEqual(unavailable.predicates, {
     approval:null, explicit_review:false, below_threshold:null, unsupported_operation:false,
   });
   assert.equal(applyAgentPolicy('x', {route:'human_review',approval_needed:0,confidence:.1}).reason,'model_review');
