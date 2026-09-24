@@ -34,7 +34,7 @@ export async function loadExperiment(configPath) {
   return { config, cases, datasetBytes };
 }
 
-export function classificationMetrics(rows, labels = Object.keys(questions.department.criteria)) {
+export function classificationMetricsV1(rows, labels = Object.keys(questions.department.criteria)) {
   if (!Array.isArray(labels) || !labels.length ||
       labels.some(label => typeof label !== 'string' || !label.trim()) ||
       new Set(labels).size !== labels.length) throw new Error('Invalid classification labels.');
@@ -61,6 +61,9 @@ export function classificationMetrics(rows, labels = Object.keys(questions.depar
   return { attempts: rows.length, successful, errors: rows.length - successful,
     accuracy: ratio(correct, successful), correct_per_attempt: ratio(correct, rows.length), confusion_matrix, per_class };
 }
+
+// Keep v1 entrypoint unchanged for historical agent-bench replay; new semantics need v2.
+export const classificationMetrics = classificationMetricsV1;
 
 export function diagnosticMetrics(rows, live) {
   return { baseline: classificationMetrics(rows.map(row => ({ expected: row.expected, prediction: row.baseline }))),

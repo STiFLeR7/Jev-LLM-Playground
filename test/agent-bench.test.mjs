@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { loadAgentExperiment, validateAgentDataset, parseRoutingAnswer, summarizeAgentRows, buildRoutingPacket, replayAgentReport } from '../agent-bench.mjs';
 import { spawnSync } from 'node:child_process';
 import { applyAgentPolicy } from '../agent.mjs';
@@ -199,6 +200,26 @@ test('offline freeze, baseline, replay and exclusive output', async t => {
   const bytes = await readFile(baseline);
   assert.notEqual(cli('--baseline',freeze,'--out',baseline).status,0);
   assert.deepEqual(await readFile(baseline),bytes);
+  assert.notEqual(cli('--freeze','experiments/agent-routing-v2.json','--baseline',freeze,'--out',join(root,'invalid.json')).status,0);
+  assert.notEqual(cli('--replay',baseline,'--out',join(root,'invalid-replay.json')).status,0);
+  for (const name of ['agent-bench.mjs','agent.mjs','evaluation.mjs','playground.mjs','budget.mjs']) {
+    let source = await readFile(name,'utf8');
+    if (name === 'agent.mjs') {
+      for (const alias of ['agentRequest','baselineRoute','applyAgentPolicy']) {
+        const line = `export const ${alias} = ${alias}V1;`;
+        assert.ok(source.includes(line));
+        source = source.replace(line,`export const ${alias} = () => { throw Error('changed current ${alias}'); };`);
+      }
+    }
+    if (name === 'evaluation.mjs') {
+      const line = 'export const classificationMetrics = classificationMetricsV1;';
+      assert.ok(source.includes(line));
+      source = source.replace(line,"export const classificationMetrics = () => { throw Error('changed current metrics'); };");
+    }
+    await writeFile(join(root,name),source);
+  }
+  const historical = await import(pathToFileURL(join(root,'agent-bench.mjs')).href);
+  assert.deepEqual(historical.replayAgentReport(report),report);
 });
 
 test('journal import validates identity, order, metadata and interruption without fetch', async t => {
@@ -237,6 +258,9 @@ test('journal import validates identity, order, metadata and interruption withou
   report = JSON.parse(await readFile(next,'utf8'));
   assert.equal(report.summary.successful,1);
   assert.equal(report.provenance.tool_audit,'unverified');
+  assert.deepEqual(report.telemetry,{usage_tokens:null,cost_usd:null});
+  assert.equal(report.attempts[0].terminal.usage_tokens,null);
+  assert.equal(report.attempts[0].terminal.cost_usd,null);
   assert.deepEqual(replayAgentReport(report),report);
   const tampered = structuredClone(report);tampered.summary.successful = 2;
   assert.throws(()=>replayAgentReport(tampered));
@@ -256,6 +280,8 @@ test('journal import validates identity, order, metadata and interruption withou
     [header,pending,terminal,pending],
     [header,{...pending,case_id:freeze.case_ids[1]}],
     [header,pending,{...terminal,tool_audit:'used'},
+      {type:'pending',case_id:freeze.case_ids[1],started_at:now}],
+    [header,pending,{...terminal,raw_final:'bad answer'},
       {type:'pending',case_id:freeze.case_ids[1],started_at:now}],
   ]) {
     await writeJournal(records);
