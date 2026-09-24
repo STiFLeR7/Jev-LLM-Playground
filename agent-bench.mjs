@@ -32,7 +32,7 @@ function withoutGate(row, gate) {
   const reason = ['approval','explicit_review','below_threshold','unsupported_operation']
     .find(key => key !== gate && p[key] === true);
   return {route:reason || row.observation.route === 'human_review' ? 'human_review' : row.observation.route,
-    reason:reason ?? 'threshold_met'};
+    reason:reason === 'approval' ? 'approval_needed' : reason === 'explicit_review' ? 'model_review' : reason ?? 'threshold_met'};
 }
 
 function subsetMetrics(rows) {
@@ -102,7 +102,7 @@ export function summarizeAgentRows(rows) {
     out.gates[`remove_${gate}`] = {changed_to_automatic:changed.length,
       correct_automatic:changed.filter(r => r.observation.route === r.expected_route).length,
       wrong_automatic:changed.filter(r => r.observation.route !== r.expected_route).length,
-      reasons:Object.fromEntries(['approval','explicit_review','below_threshold','unsupported_operation','threshold_met']
+      reasons:Object.fromEntries(['approval_needed','model_review','below_threshold','unsupported_operation','threshold_met']
         .map(reason => [reason,replayed.filter(r => r.disposition.reason === reason).length]))};
   }
   out.by_stratum = Object.fromEntries(strata.map(s => [s,subsetMetrics(rows.filter(r => r.stratum === s))]));

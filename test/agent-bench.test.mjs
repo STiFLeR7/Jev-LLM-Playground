@@ -72,8 +72,11 @@ test('counterfactual gates replay in precedence order and pair correctness is se
   assert.equal(m.gates.remove_approval.reasons.unsupported_operation,2);
   assert.equal(m.gates.remove_unsupported_operation.changed_to_automatic,1);
   assert.equal(m.gates.remove_unsupported_operation.wrong_automatic,1);
+  assert.equal(m.gates.remove_unsupported_operation.reasons.approval_needed,1);
   const explicit=row('e','other','explain: hi','human_review','llm',{route:'human_review',approval_needed:false});
   assert.equal(summarizeAgentRows([explicit]).gates.remove_explicit_review.changed_to_automatic,0);
+  const overlappingReview=row('f','other','explain: bye','human_review','llm',{route:'human_review',approval_needed:true});
+  assert.equal(summarizeAgentRows([overlappingReview]).gates.remove_approval.reasons.model_review,1);
   assert.equal(summarizeAgentRows([]).coverage,null);
   const baselineOnly=summarizeAgentRows([row('z','unattempted','draft: hi','llm','llm',null,'not_attempted')]);
   assert.equal(baselineOnly.rules.accuracy,1);
