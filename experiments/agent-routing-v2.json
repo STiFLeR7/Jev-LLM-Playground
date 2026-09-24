@@ -1,0 +1,1 @@
+{"schema_version":1,"dataset":"../data/agent-routing-v2.json","dataset_version":"agent-routing-v2","split":"test","policy_version":"agent-gating-v1","threshold":0.8,"requested_model":"gpt-6-luna","attempts_per_case":1}
