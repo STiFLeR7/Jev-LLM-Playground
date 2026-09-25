@@ -109,8 +109,8 @@ function makeReportV1(freeze, journal = null) {
     freeze,freeze_hash:freeze.artifact_hash,journal_hash:journalHash,journal_header:header,run_id:runId,
     attempts,rows,summary:summarizeAgentRowsV1(rows),telemetry:{usage_tokens:null,cost_usd:null},
     provenance:{provider_authenticity:'unverified',tool_audit:journal ?
-      (attempts.some(a=>a.terminal?.tool_audit === 'unverified') ? 'unverified' :
-        attempts.some(a=>a.terminal?.tool_audit === 'used') ? 'used' : 'none_observed') : 'not_applicable'}};
+      (attempts.some(a=>a.terminal?.tool_audit === 'used') ? 'used' :
+        attempts.some(a=>a.terminal?.tool_audit === 'unverified') ? 'unverified' : 'none_observed') : 'not_applicable'}};
 }
 
 export function replayAgentReportV1(report) {
@@ -132,15 +132,16 @@ function journalFromRecordsV1(attempts,freeze,header,journalHash) {
   requireValid(own(header,['type','schema_version','freeze_hash','run_id','created_at']) &&
     header.type === 'header' && header.schema_version === 1 && header.freeze_hash === freeze.artifact_hash &&
     named(header.run_id) && timestamp(header.created_at) &&
+    Date.parse(header.created_at) >= Date.parse(freeze.started_at) &&
     Array.isArray(attempts) && attempts.length <= 48 && hex(journalHash), 'Invalid journal attempts.');
   const ids = new Set(freeze.case_ids), seen = new Set(), sessions = new Set(), terminals = new Map();
-  let pending = null, stopped = false;
+  let pending = null, stopped = false, previousFinished = header.created_at;
   for (const attempt of attempts) {
     requireValid(own(attempt,['pending','terminal']) && !stopped &&
       own(attempt.pending,['type','case_id','started_at']) && attempt.pending.type === 'pending' &&
       ids.has(attempt.pending.case_id) && !seen.has(attempt.pending.case_id) &&
       attempt.pending.case_id === freeze.case_ids[seen.size] && timestamp(attempt.pending.started_at) &&
-      Date.parse(attempt.pending.started_at) >= Date.parse(header.created_at), 'Invalid pending attempt.');
+      Date.parse(attempt.pending.started_at) >= Date.parse(previousFinished), 'Invalid pending attempt.');
     const caseId = attempt.pending.case_id;
     seen.add(caseId);
     if (attempt.terminal === null) { requireValid(attempt === attempts.at(-1), 'Pending attempt is not final.'); pending = caseId; continue; }
@@ -160,6 +161,7 @@ function journalFromRecordsV1(attempts,freeze,header,journalHash) {
       t.usage_tokens === null && t.cost_usd === null, 'Invalid terminal attempt.');
     sessions.add(t.session_id);
     terminals.set(caseId,t);
+    previousFinished = t.finished_at;
     if (t.status === 'error' || t.tool_audit === 'used' || !validAnswerV1(t.raw_final)) stopped = true;
   }
   const records = [header,...attempts.flatMap(a=>a.terminal ? [a.pending,a.terminal] : [a.pending])];

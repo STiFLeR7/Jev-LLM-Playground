@@ -229,7 +229,7 @@ test('journal import validates identity, order, metadata and interruption withou
   const freezePath = join(root,'freeze.json'), journalPath = join(root,'journal.jsonl'), reportPath = join(root,'report.json');
   assert.equal(cli('--freeze','experiments/agent-routing-v2.json','--out',freezePath).status,0);
   const freeze = JSON.parse(await readFile(freezePath,'utf8'));
-  const now = '2026-09-24T00:00:00.000Z';
+  const now = freeze.started_at;
   const header = {type:'header',schema_version:1,freeze_hash:freeze.artifact_hash,run_id:'run-1',created_at:now};
   const pending = {type:'pending',case_id:freeze.case_ids[0],started_at:now};
   const terminal = {type:'terminal',case_id:pending.case_id,session_id:'session-1',
@@ -262,6 +262,29 @@ test('journal import validates identity, order, metadata and interruption withou
   assert.equal(report.attempts[0].terminal.usage_tokens,null);
   assert.equal(report.attempts[0].terminal.cost_usd,null);
   assert.deepEqual(replayAgentReport(report),report);
+  const later = ms => new Date(Date.parse(now)+ms).toISOString();
+  const secondPending = {type:'pending',case_id:freeze.case_ids[1],started_at:later(3000)};
+  const secondTerminal = {...terminal,case_id:secondPending.case_id,session_id:'session-2',
+    started_at:later(3000),finished_at:later(4000),tool_audit:'used'};
+  const mixedPath = join(root,'mixed.json');
+  await writeJournal([header,pending,{...terminal,finished_at:later(2000)},secondPending,secondTerminal]);
+  assert.equal(cli('--import',journalPath,'--freeze',freezePath,'--out',mixedPath).status,0);
+  const mixed = JSON.parse(await readFile(mixedPath,'utf8'));
+  assert.equal(mixed.summary.successful,1);assert.equal(mixed.summary.error,1);
+  assert.equal(mixed.summary.not_attempted,46);
+  const rehash = changed => {
+    const records = [changed.journal_header,...changed.attempts.flatMap(a=>[a.pending,a.terminal])];
+    changed.journal_hash = createHash('sha256').update(records.map(r=>JSON.stringify(r)).join('\n')+'\n').digest('hex');
+    return changed;
+  };
+  const beforeFreeze = structuredClone(mixed);
+  beforeFreeze.journal_header.created_at = later(-2000);
+  beforeFreeze.attempts[0].pending.started_at = later(-1000);
+  assert.throws(()=>replayAgentReport(rehash(beforeFreeze)),/Invalid journal/);
+  const overlapping = structuredClone(mixed);
+  overlapping.attempts[1].pending.started_at = later(1000);
+  assert.throws(()=>replayAgentReport(rehash(overlapping)),/Invalid pending attempt/);
+  assert.equal(mixed.provenance.tool_audit,'used');
   const tampered = structuredClone(report);tampered.summary.successful = 2;
   assert.throws(()=>replayAgentReport(tampered));
   const tamperedHash = structuredClone(report);tamperedHash.journal_hash = '0'.repeat(64);
