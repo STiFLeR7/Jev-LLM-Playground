@@ -1,11 +1,13 @@
 # Agent Decision Bench — specification
 
-Status: proposed implementation contract, written 2026-09-23 for owner review.
+Status: owner-approved revised contract and implementation plan; section 9 pilot completed locally on 2026-09-25.
 The [landscape review](../../../doc/research/2026-09-23-agent-benchmark-landscape.md)
 informs the policy-attribution pilot defined in section 9. That section supersedes
 the initial delivery sequence and API-run scope below for the current goal.
-The owner approved the direction; this revised written contract awaits review
-before implementation planning. No new Jev/NVIDIA calls or publication authorized.
+The current section 9 [pilot report](../../03-evaluation/agent-routing-pilot.md)
+records author-reference evidence only. Jev/NVIDIA comparison, human adjudication,
+Evidence UI expansion and publication remain separate future work. No new
+Jev/NVIDIA calls or publication were authorized for this pilot.
 
 ## 1. Question and scope
 

@@ -3,7 +3,7 @@
 Strategy: [user's long-term plan](plans/Jev-LLM-Playground-Strategic-Plan.md).
 Implementation detail: [reference-release plan](../docs/superpowers/plans/2026-09-21-reference-release.md).
 
-Updated 2026-09-22. This status distinguishes implemented local work from future release goals. Release publication is tracked separately from feature verification; no production readiness is claimed.
+Updated 2026-09-25. Implementation through commit 2fd120a was pushed to main; the Agent Decision Bench pilot is local. This status distinguishes merged work, local work, proposed work and tagged releases. Release publication is tracked separately from feature verification; no production readiness is claimed.
 
 ## 1. Decision Bench foundation — implemented locally
 
@@ -40,7 +40,7 @@ Milestone 2 is published in v0.1.0. Its exact release commit passed hosted CI on
 
 The v0.2.0 benchmark and [v0.3.0 challenge benchmark](https://github.com/STiFLeR7/Jev-LLM-Playground/releases/tag/v0.3.0) are published. v0.3.0 points to `da25781d16a388780e4b7385d0978b877c9c22bb`, which passed [hosted CI](https://github.com/STiFLeR7/Jev-LLM-Playground/actions/runs/35587069614). Earlier tags remain unchanged. See [v0.3.0 release notes](../docs/releases/v0.3.0.md).
 
-## 4. v0.4.0 offline evidence explorer — implemented locally, unreleased
+## 4. v0.4.0 offline evidence explorer — pushed to main, untagged
 
 - [x] Select historical, v2, and v3 recorded reports through an explicit allowlist.
 - [x] Keep unique tickets, repeated attempts, and agreed/disputed references distinct.
@@ -49,19 +49,58 @@ The v0.2.0 benchmark and [v0.3.0 challenge benchmark](https://github.com/STiFLeR
 - [x] Verify browser switching, errors/retry, mobile layout, keyboard focus, and old endpoint compatibility.
 - [x] Update walkthrough and status; see [verification](../docs/verification/2026-09-22-evidence-explorer.md).
 - [x] Decision Studio: reference-inspired three-panel UI, Playground/Evidence/Learn navigation, responsive layout, and offline browser checks. [UI verification](../docs/verification/2026-09-22-decision-studio.md).
-- [ ] Separate authorization to commit, push, tag, and publish v0.4.0.
+- [x] Committed and pushed in 2b6963d.
+- [ ] Verify release-candidate hosted CI; separately authorize tag and publication.
 - [x] Session-only API-key entry and clearing; no disk/browser storage or automatic provider calls.
 
-## 5. Agent harness — implemented locally, unreleased
+## 5. Agent harness — pushed to main, untagged
 
 - [x] Detailed [specification](../docs/superpowers/specs/2026-09-22-agent-harness-design.md) and [execution plan](../docs/superpowers/plans/2026-09-22-agent-harness.md) written before code.
 - [x] Route/approval/complexity questions, normalized answers and deterministic execution policy.
-- [x] One consented pure local utility/workflow operation; explicit unconnected LLM handoff and human-review stop.
-- [x] Offline Agent Lab and CLI; live CLI uses the existing cumulative budget and exclusive reports.
+- [x] One consented pure local utility/workflow operation and human-review stop; optional NVIDIA handoff added in milestone 6.
+- [x] Offline preview/baseline routing in Agent Lab and CLI; live Jev CLI uses the existing cumulative budget and exclusive reports.
 - [x] Versioned 20-case synthetic baseline conformance evaluation, not semantic model validation.
 - [x] Final [verification record](../docs/verification/2026-09-22-agent-harness.md): 49 tests, browser checks, source/visual reviews and unchanged cumulative spend.
-- [ ] Separate authorization to commit/push/tag/publish this milestone.
+- [x] Initial harness committed and pushed in 2b6963d.
+- [ ] Separate authorization to tag/publish this milestone.
 
-## 6. Next: connected reasoning and independent evidence
+## 6. Connected NVIDIA handoff — pushed to main, untagged
 
 The opt-in [NVIDIA text handoff](../docs/04-recipes/nvidia-handoff.md) is implemented with fixed endpoint/model, consent, timeout and output limits. Nemotron 3 Super was verified through both baseline routing and a live Jev-to-Nemotron CLI run on 2026-09-23; see the [verification record](../docs/verification/2026-09-23-nvidia-handoff.md). Human-adjudicated agent-routing labels, semantic comparisons and document operations remain future work. No latency/cost benefit or production reliability is established by this milestone.
+
+- [x] Explicit NVIDIA consent, server-side key, text-only output, 512-token limit, 30-second timeout, no retries or paid fallback.
+- [x] 51 tests and browser checks; successful synthetic Jev-to-Nemotron CLI smoke.
+- [x] Cumulative recorded Jev spend USD 0.006442296 under USD 0.05; NVIDIA billing unmeasured, not asserted zero.
+- [x] Committed and pushed in 2fd120a; clean worktree confirmed after push.
+- [ ] Release-candidate hosted CI and separately authorized tag/release.
+
+## 7. Agent Decision Bench — offline pilot complete locally
+
+Contract: [Agent Decision Bench specification](../docs/superpowers/specs/2026-09-23-agent-decision-bench-design.md).
+
+- [x] Draft a routing-only comparison of rules, Jev and Nemotron; no downstream execution.
+- [x] Research [existing benchmark evidence and differentiation](research/2026-09-23-agent-benchmark-landscape.md); independent evaluations already exist.
+- [x] Incorporate research into revised spec: exploratory pilot, policy attribution, always-review control and contrastive task families.
+- [x] Specify fresh-context Codex GPT-6 Luna evaluation and shared-workspace isolation limitations.
+- [x] Owner-approved revised written spec and file-level implementation plan; execution method selected.
+- [x] Versioned 64-case dataset: 16 development / 48 test; family-separated splits and documented label rubric.
+- [ ] Independent human review, preserved disagreements and frozen test labels. AI review is not human adjudication.
+- [x] Offline rules and always-review controls, validated reports, replay and hand-counted metric tests.
+- [x] Bounded [author-reference Luna pilot](../docs/03-evaluation/agent-routing-pilot.md): 48/48 test attempts, raw 43/48, final policy 46/48, 24/48 automatic with zero wrong automatic against author labels. Local ignored artifacts, no new Jev/NVIDIA API calls or publication.
+- [ ] Model comparators with shared capability policy, Jev budget enforcement and NVIDIA call ceiling.
+- [ ] Separately authorized live runs: up to three passes per provider, failures/partial runs retained, spending reconciled.
+- [x] Report route quality, wrong automatic routes, review coverage, pair consistency and unavailable usage/cost; session wall time is not provider latency.
+- [ ] Follow-on Evidence explorer support for provider, policy and reference-status comparison.
+
+The local pilot made no paid API calls and grants no new spending. Its author
+references are not independent-human evidence; that milestone still requires
+genuine human review. Jev/NVIDIA comparison and UI integration remain pending.
+
+## 8. After the benchmark
+
+1. Package the verified Decision Studio, agent harness and benchmark into a
+   coherent release; confirm hosted CI and obtain publication authorization.
+2. Build document triage as the next distinct recipe with its own specification,
+   labels and safety boundaries.
+3. Evaluate downstream answer quality and operational trade-offs separately
+   before claiming that routing reduces total latency or cost.
