@@ -3,7 +3,7 @@
 Strategy: [user's long-term plan](plans/Jev-LLM-Playground-Strategic-Plan.md).
 Implementation detail: [reference-release plan](../docs/superpowers/plans/2026-09-21-reference-release.md).
 
-Updated 2026-09-25. Implementation through commit 2fd120a was pushed to main; the Agent Decision Bench pilot is local. This status distinguishes merged work, local work, proposed work and tagged releases. Release publication is tracked separately from feature verification; no production readiness is claimed.
+Updated 2026-09-25. Implementation through commit d38b241 was pushed to main, including the Agent Decision Bench pilot implementation and report; raw pilot artifacts remain local and ignored. This status distinguishes merged work, local work, proposed work and tagged releases. Release publication is tracked separately from feature verification; no production readiness is claimed.
 
 ## 1. Decision Bench foundation — implemented locally
 
@@ -74,7 +74,7 @@ The opt-in [NVIDIA text handoff](../docs/04-recipes/nvidia-handoff.md) is implem
 - [x] Committed and pushed in 2fd120a; clean worktree confirmed after push.
 - [ ] Release-candidate hosted CI and separately authorized tag/release.
 
-## 7. Agent Decision Bench — offline pilot complete locally
+## 7. Agent Decision Bench — offline pilot pushed, untagged
 
 Contract: [Agent Decision Bench specification](../docs/superpowers/specs/2026-09-23-agent-decision-bench-design.md).
 
@@ -85,6 +85,7 @@ Contract: [Agent Decision Bench specification](../docs/superpowers/specs/2026-09
 - [x] Owner-approved revised written spec and file-level implementation plan; execution method selected.
 - [x] Versioned 64-case dataset: 16 development / 48 test; family-separated splits and documented label rubric.
 - [ ] Independent human review, preserved disagreements and frozen test labels. AI review is not human adjudication.
+- [x] Prepare the [human-review handoff](../docs/03-evaluation/agent-routing-human-review.md), unlabeled extraction command and response contract; actual independent submissions remain pending.
 - [x] Offline rules and always-review controls, validated reports, replay and hand-counted metric tests.
 - [x] Bounded [author-reference Luna pilot](../docs/03-evaluation/agent-routing-pilot.md): 48/48 test attempts, raw 43/48, final policy 46/48, 24/48 automatic with zero wrong automatic against author labels. Local ignored artifacts, no new Jev/NVIDIA API calls or publication.
 - [ ] Model comparators with shared capability policy, Jev budget enforcement and NVIDIA call ceiling.
